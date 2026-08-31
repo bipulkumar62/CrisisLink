@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, Bell, Settings, AlertTriangle, Radio, Menu, X, MapPin } from 'lucide-react';
+import { Shield, Bell, Settings, AlertTriangle, Radio, Menu, X, MapPin, BrainCircuit, Truck, FileText, Map as MapIcon, Activity } from 'lucide-react';
 import { RoutePath, APP_CONFIG } from '@/src/config/constants';
 import { useEmergencyData } from '@/src/context/EmergencyDataContext';
 import { useAuth } from '@/src/context/AuthContext';
@@ -152,42 +152,105 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({ currentRoute, onNavigate }
             Navigation Menu
           </div>
           <div className="grid grid-cols-1 gap-1">
-            <button
-              onClick={() => handleNav('citizen-landing')}
-              className={`w-full text-left px-3 py-2 rounded text-xs font-semibold ${
-                currentRoute === 'citizen-landing' ? 'bg-blue-50 text-[#2563EB]' : 'text-[#101828]'
-              }`}
-            >
-              Overview & Portal
-            </button>
-            <button
-              onClick={() => handleNav('citizen-live')}
-              className={`w-full text-left px-3 py-2 rounded text-xs font-semibold flex items-center justify-between ${
-                currentRoute === 'citizen-live' ? 'bg-blue-50 text-[#2563EB]' : 'text-[#101828]'
-              }`}
-            >
-              <span>Live Emergency Map</span>
-              <span className="px-1.5 py-0.5 bg-[#D92D20] text-white text-[10px] rounded font-mono-data font-bold">
-                {incidents.length} Active
-              </span>
-            </button>
-            <button
-              onClick={() => handleNav('citizen-status')}
-              className={`w-full text-left px-3 py-2 rounded text-xs font-semibold ${
-                currentRoute === 'citizen-status' ? 'bg-blue-50 text-[#2563EB]' : 'text-[#101828]'
-              }`}
-            >
-              Jaipur Grid Status & Telemetry
-            </button>
-            <button
-              onClick={() => handleNav(user ? 'command-dashboard' : 'command-login')}
-              className={`w-full text-left px-3 py-2 rounded text-xs font-semibold flex items-center gap-2 ${
-                isCommandView ? 'bg-[#0B1F33] text-white' : 'text-[#101828]'
-              }`}
-            >
-              <Radio className="w-3.5 h-3.5 text-[#2563EB]" />
-              <span>Operator CAD Portal</span>
-            </button>
+            {(!isCommandView || !user) ? (
+              <>
+                <button
+                  onClick={() => handleNav('citizen-landing')}
+                  className={`w-full text-left px-3 py-2 rounded text-xs font-semibold ${
+                    currentRoute === 'citizen-landing' ? 'bg-blue-50 text-[#2563EB]' : 'text-[#101828]'
+                  }`}
+                >
+                  Overview & Portal
+                </button>
+                <button
+                  onClick={() => handleNav('citizen-live')}
+                  className={`w-full text-left px-3 py-2 rounded text-xs font-semibold flex items-center justify-between ${
+                    currentRoute === 'citizen-live' ? 'bg-blue-50 text-[#2563EB]' : 'text-[#101828]'
+                  }`}
+                >
+                  <span>Live Emergency Map</span>
+                  <span className="px-1.5 py-0.5 bg-[#D92D20] text-white text-[10px] rounded font-mono-data font-bold">
+                    {incidents.length} Active
+                  </span>
+                </button>
+                <button
+                  onClick={() => handleNav('citizen-status')}
+                  className={`w-full text-left px-3 py-2 rounded text-xs font-semibold ${
+                    currentRoute === 'citizen-status' ? 'bg-blue-50 text-[#2563EB]' : 'text-[#101828]'
+                  }`}
+                >
+                  Jaipur Grid Status & Telemetry
+                </button>
+                <button
+                  onClick={() => handleNav(user ? 'command-dashboard' : 'command-login')}
+                  className={`w-full text-left px-3 py-2 rounded text-xs font-semibold flex items-center gap-2 ${
+                    isCommandView ? 'bg-[#0B1F33] text-white' : 'text-[#101828]'
+                  }`}
+                >
+                  <Radio className="w-3.5 h-3.5 text-[#2563EB]" />
+                  <span>Operator CAD Portal</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => handleNav('command-dashboard')}
+                  className={`w-full text-left px-3 py-2 rounded text-xs font-semibold flex items-center gap-2 ${
+                    currentRoute === 'command-dashboard' ? 'bg-blue-600 text-white' : 'text-[#101828]'
+                  }`}
+                >
+                  <Shield className="w-4 h-4" /> Command Center
+                </button>
+                <button
+                  onClick={() => handleNav('command-incidents')}
+                  className={`w-full text-left px-3 py-2 rounded text-xs font-semibold flex items-center gap-2 ${
+                    currentRoute === 'command-incidents' ? 'bg-blue-600 text-white' : 'text-[#101828]'
+                  }`}
+                >
+                  <BrainCircuit className="w-4 h-4" /> Intelligence & Incidents
+                </button>
+                <button
+                  onClick={() => handleNav('command-map')}
+                  className={`w-full text-left px-3 py-2 rounded text-xs font-semibold flex items-center gap-2 ${
+                    currentRoute === 'command-map' ? 'bg-blue-600 text-white' : 'text-[#101828]'
+                  }`}
+                >
+                  <MapIcon className="w-4 h-4" /> Operational Map
+                </button>
+                <button
+                  onClick={() => handleNav('command-resources')}
+                  className={`w-full text-left px-3 py-2 rounded text-xs font-semibold flex items-center gap-2 ${
+                    currentRoute === 'command-resources' ? 'bg-blue-600 text-white' : 'text-[#101828]'
+                  }`}
+                >
+                  <Truck className="w-4 h-4" /> Resource Manager
+                </button>
+                <button
+                  onClick={() => handleNav('command-reports')}
+                  className={`w-full text-left px-3 py-2 rounded text-xs font-semibold flex items-center gap-2 ${
+                    currentRoute === 'command-reports' ? 'bg-blue-600 text-white' : 'text-[#101828]'
+                  }`}
+                >
+                  <FileText className="w-4 h-4" /> Citizen Triage Reports
+                </button>
+                <button
+                  onClick={() => handleNav('command-status')}
+                  className={`w-full text-left px-3 py-2 rounded text-xs font-semibold flex items-center gap-2 ${
+                    currentRoute === 'command-status' ? 'bg-blue-600 text-white' : 'text-[#101828]'
+                  }`}
+                >
+                  <Activity className="w-4 h-4" /> Analytics & Telemetry
+                </button>
+                
+                <div className="h-px bg-slate-200 my-1" />
+                <button
+                  onClick={() => handleNav('citizen-landing')}
+                  className="w-full text-left px-3 py-2 rounded text-xs font-semibold text-slate-500"
+                >
+                  Exit to Public Portal
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}

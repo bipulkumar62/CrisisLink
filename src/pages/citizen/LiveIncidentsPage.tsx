@@ -166,7 +166,7 @@ export const LiveIncidentsPage: React.FC<LiveIncidentsPageProps> = ({
         /* Tactical Interactive Map View */
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
           {/* Map Area */}
-          <div className="lg:col-span-2 rounded-xl overflow-hidden border border-[#D9E0E7] shadow-xs h-[540px]">
+          <div className="lg:col-span-2 rounded-xl overflow-hidden border border-[#D9E0E7] shadow-xs h-[300px] sm:h-[420px] lg:h-[540px]">
             <TacticalMap
               incidents={filteredIncidents}
               resources={resources}

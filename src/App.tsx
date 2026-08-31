@@ -59,7 +59,13 @@ function AppContent() {
 
         {/* Page Content Viewport */}
         <main
-          className={`flex-1 flex flex-col min-w-0 ${isDashboardOrMap ? 'overflow-hidden h-full' : 'px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto w-full'}`}
+          className={`flex-1 flex flex-col min-w-0 ${
+            isDashboardOrMap
+              ? 'overflow-hidden h-full'
+              : isCommandRoute
+              ? 'overflow-y-auto'
+              : 'px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto w-full'
+          }`}
         >
           {/* CITIZEN PORTAL ROUTES */}
           {currentRoute === 'citizen-landing' && (

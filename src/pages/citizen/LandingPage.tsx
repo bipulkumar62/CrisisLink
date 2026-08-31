@@ -119,7 +119,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onSelectIn
           </div>
 
           {/* Immediate Hotline Warning Strip */}
-          <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center justify-between gap-3 text-xs text-[#D92D20]">
+          <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-[#D92D20]">
             <div className="flex items-center gap-2 font-medium">
               <PhoneCall className="w-4 h-4 shrink-0" />
               <span>Life-threatening emergency? Call national dispatch immediately.</span>
@@ -156,7 +156,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onSelectIn
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
           {/* Map Preview */}
-          <div className="lg:col-span-2 rounded-xl overflow-hidden border border-[#D9E0E7] shadow-xs h-[420px]">
+          <div className="lg:col-span-2 rounded-xl overflow-hidden border border-[#D9E0E7] shadow-xs h-[260px] sm:h-[340px] lg:h-[420px]">
             <TacticalMap
               incidents={activeIncidents}
               resources={resources}

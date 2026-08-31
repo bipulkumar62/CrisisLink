@@ -61,11 +61,11 @@ export const OperationalMapPage: React.FC<OperationalMapPageProps> = ({
         </div>
 
         {/* Quick Layer Switchers */}
-        <div className="flex items-center gap-2 text-xs font-mono-data">
+        <div className="flex items-center gap-2 text-xs font-mono-data overflow-x-auto pb-0.5 flex-nowrap">
           <button
             type="button"
             onClick={() => setActiveLayer('ALL')}
-            className={`px-2.5 py-1 rounded text-xs font-bold transition-colors ${
+            className={`px-2.5 py-1 rounded text-xs font-bold transition-colors whitespace-nowrap ${
               activeLayer === 'ALL'
                 ? 'bg-[#0B1F33] text-white'
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200'

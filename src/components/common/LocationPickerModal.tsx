@@ -108,7 +108,7 @@ export const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
       id="location-picker-modal"
       className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#0B1F33]/80 backdrop-blur-xs animate-in fade-in duration-200"
     >
-      <div className="bg-white rounded-2xl border border-[#D9E0E7] shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+      <div className="bg-white rounded-2xl border border-[#D9E0E7] shadow-xl max-w-2xl w-full max-h-[96dvh] sm:max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-[#D9E0E7] flex items-center justify-between bg-[#F7F8FA] shrink-0">
           <div className="flex items-center gap-2.5">

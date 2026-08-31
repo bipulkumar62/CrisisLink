@@ -114,20 +114,20 @@ export const IncidentDetailPage: React.FC<IncidentDetailPageProps> = ({
           <ArrowLeft className="w-4 h-4" />
           Back to Incident Queue
         </button>
-        <span className="text-xs font-mono-data text-slate-500">
+        <span className="hidden sm:inline text-xs font-mono-data text-slate-500">
           Last Synchronized: {formatRelativeTime(incident.updatedAt)}
         </span>
       </div>
 
       {/* MANDATORY AI OBSERVATION LABEL BANNER */}
-      <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between text-xs text-blue-950 shadow-xs">
+      <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-blue-950 shadow-xs">
         <div className="flex items-center gap-2">
           <Bot className="w-4 h-4 text-blue-700 shrink-0" />
           <span className="font-bold">
             AI-assisted observations — Human confirmation recommended
           </span>
         </div>
-        <span className="text-[10px] font-mono-data font-semibold text-blue-700 bg-white/70 px-2 py-0.5 rounded border border-blue-200">
+        <span className="text-[10px] font-mono-data font-semibold text-blue-700 bg-white/70 px-2 py-0.5 rounded border border-blue-200 self-start sm:self-auto">
           Supervised CAD Protocol
         </span>
       </div>
