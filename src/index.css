@@ -96,10 +96,18 @@ html, body {
   max-width: 100vw;
 }
 
-/* Ensure all images, videos, and iframes never overflow their containers */
-img, video, iframe {
+/* Ensure all images, videos, and iframes never overflow their containers, except inside Leaflet/MapLibre */
+img:not(.leaflet-container img), video, iframe {
   max-width: 100%;
   height: auto;
+}
+
+/* Fix for Leaflet and MapLibre breaking due to max-width/height:auto on images/canvas */
+.leaflet-container img,
+.leaflet-container canvas,
+.maplibregl-canvas {
+  max-width: none !important;
+  max-height: none !important;
 }
 
 /* Leaflet map: ensure the map fills its container on all screen sizes */

@@ -6,10 +6,10 @@
  * No API key required.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
-import '@maplibre/maplibre-gl-leaflet';
+import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 interface MapLibreBasemapProps {
@@ -19,20 +19,40 @@ interface MapLibreBasemapProps {
 
 export const MapLibreBasemap: React.FC<MapLibreBasemapProps> = ({ styleUrl }) => {
   const map = useMap();
+  const [pluginLoaded, setPluginLoaded] = useState(false);
 
   useEffect(() => {
-    const glLayer = L.maplibreGL({
+    // Expose globals required by the maplibre-gl-leaflet plugin before importing it
+    if (typeof window !== 'undefined') {
+      (window as any).maplibregl = maplibregl;
+      (window as any).L = L;
+    }
+    
+    // Dynamically import to ensure it runs after globals are set
+    import('@maplibre/maplibre-gl-leaflet').then(() => {
+      setPluginLoaded(true);
+    }).catch(err => {
+      console.error("Failed to load maplibre-gl-leaflet plugin", err);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!pluginLoaded || !(L as any).maplibreGL) return;
+
+    const glLayer = (L as any).maplibreGL({
       style: styleUrl,
       attribution:
-        '&copy; <a href="https://openfreemap.org">OpenFreeMap</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    } as any);
+        '&copy; <a href="https://openfreemap.org">OpenFreeMap</a> contributors',
+    });
 
     glLayer.addTo(map);
 
     return () => {
-      map.removeLayer(glLayer);
+      if (map && glLayer) {
+        map.removeLayer(glLayer);
+      }
     };
-  }, [map, styleUrl]);
+  }, [map, styleUrl, pluginLoaded]);
 
   return null;
 };
