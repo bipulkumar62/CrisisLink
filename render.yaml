@@ -1,0 +1,46 @@
+# ============================================================
+# CrisisLink — Render Deployment Blueprint
+# Project: CrisisLink | Supabase: nlpqlvcknpodvcukkddc
+#
+# Deploy steps:
+#   1. Push this repo to GitHub
+#   2. Go to https://dashboard.render.com → New → Blueprint
+#   3. Connect your repo — Render reads this file automatically
+#   4. Add the Secret Files / Env Vars listed below in the Render dashboard
+# ============================================================
+
+services:
+
+  # ──────────────────────────────────────────────
+  # SERVICE: Backend — FastAPI Python Server
+  # ──────────────────────────────────────────────
+  - type: web
+    name: crisislink-backend
+    runtime: python
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      # ── App Settings ──
+      - key: APP_NAME
+        value: CrisisLink CAD API
+      - key: ENVIRONMENT
+        value: production
+      - key: API_V1_STR
+        value: /api/v1
+      - key: LOG_LEVEL
+        value: INFO
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "1440"
+      # ── Secrets (set in Render Dashboard — never commit real values) ──
+      - key: SECRET_KEY
+        generateValue: true   # Render auto-generates a secure random value
+      - key: SUPABASE_URL
+        value: https://nlpqlvcknpodvcukkddc.supabase.co
+      - key: SUPABASE_KEY
+        sync: false   # Set in Render Dashboard → Environment (use service_role key for backend)
+      - key: GEMINI_API_KEY
+        sync: false   # Set in Render Dashboard → Environment
+      # ── CORS: Allow your frontend domain ──
+      - key: CORS_ORIGINS
+        sync: false   # Set to your frontend Render URL e.g. https://crisislink-frontend.onrender.com
