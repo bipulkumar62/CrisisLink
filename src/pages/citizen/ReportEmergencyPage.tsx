@@ -413,11 +413,11 @@ export const ReportEmergencyPage: React.FC<ReportEmergencyPageProps> = ({
       {/* Top Life Hazard Warning */}
       <div
         id="life-hazard-notice"
-        className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3 text-xs text-[#D92D20] shadow-xs"
+        className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3 text-xs text-red-700 shadow-sm"
       >
-        <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
+        <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5 text-red-600" />
         <div className="flex-1 space-y-1">
-          <span className="font-bold block text-sm">Critical Life Safety Notice</span>
+          <span className="font-bold block text-sm text-red-900">Critical Life Safety Notice</span>
           <p className="leading-relaxed">
             If you or someone nearby is in immediate life-threatening danger, call national emergency services directly at <strong className="font-bold underline">112</strong> or Fire <strong className="font-bold underline">101</strong>.
           </p>
@@ -425,18 +425,18 @@ export const ReportEmergencyPage: React.FC<ReportEmergencyPageProps> = ({
       </div>
 
       {/* Main Reporting Form Card */}
-      <div className="bg-white border border-[#D9E0E7] rounded-xl p-5 sm:p-8 shadow-xs space-y-8">
-        <div className="border-b border-[#D9E0E7] pb-4 space-y-1">
+      <div className="bg-white border border-slate-200 rounded-xl p-5 sm:p-8 shadow-sm space-y-8">
+        <div className="border-b border-slate-200 pb-4 space-y-1">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#D92D20] animate-pulse"></span>
-            <span className="text-[11px] font-mono-data font-bold text-[#D92D20] uppercase tracking-wider">
+            <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
+            <span className="text-[11px] font-mono-data font-bold text-slate-500 uppercase tracking-widest">
               CAD Intake Mesh • {APP_CONFIG.REGION_LABEL}
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#101828] font-heading">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 font-heading">
             Report an Emergency Incident
           </h1>
-          <p className="text-xs sm:text-sm text-[#52606D]">
+          <p className="text-xs sm:text-sm text-slate-500">
             Eyewitness intelligence is validated locally and relayed directly to Jaipur emergency dispatchers.
           </p>
         </div>

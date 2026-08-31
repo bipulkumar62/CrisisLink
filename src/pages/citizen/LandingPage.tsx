@@ -65,33 +65,36 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onSelectIn
   return (
     <div className="space-y-12 pb-16">
       {/* Hero Section */}
-      <section className="bg-white border border-[#D9E0E7] rounded-xl p-6 sm:p-10 shadow-xs">
-        <div className="max-w-4xl space-y-6">
+      <section className="bg-white border border-slate-200 rounded-xl p-6 sm:p-10 shadow-sm relative overflow-hidden">
+        {/* Subtle background decoration */}
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-50 rounded-full blur-3xl opacity-50 -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
+        
+        <div className="max-w-4xl space-y-6 relative z-10">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#0B1F33] text-white text-[11px] font-mono-data font-bold uppercase tracking-wider">
-              <span className="w-2 h-2 rounded-full bg-[#16803A] animate-pulse"></span>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-900 text-white text-[11px] font-mono-data font-bold uppercase tracking-widest shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               {APP_CONFIG.REGION_LABEL}
             </span>
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-blue-50 text-[#2563EB] border border-blue-200 text-xs font-semibold">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 border border-blue-200 text-xs font-semibold shadow-sm">
               <Activity className="w-3.5 h-3.5" />
               {activeIncidents.length} Verified Municipal Incidents
             </span>
           </div>
 
-          <div className="space-y-3">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#101828] font-heading tracking-tight leading-tight">
+          <div className="space-y-4">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 font-heading tracking-tight leading-[1.1]">
               Rapid Emergency Intelligence & Response Coordination
             </h1>
-            <p className="text-sm sm:text-base text-[#52606D] max-w-3xl leading-relaxed">
+            <p className="text-base sm:text-lg text-slate-600 max-w-3xl leading-relaxed">
               When disaster strikes, every second matters. CrisisLink fuses eyewitness reports, real-time sensor streams, and AI signal deduplication to deliver instant situational clarity for citizens and first responders across Jaipur.
             </p>
           </div>
 
           {/* Action CTAs */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-4">
             <button
               onClick={() => onNavigate('citizen-report')}
-              className="px-6 py-3.5 bg-[#2563EB] hover:bg-[#1d4ed8] text-white font-bold text-sm rounded-lg flex items-center justify-center gap-2.5 shadow-sm active:scale-98 transition-colors cursor-pointer"
+              className="px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-lg flex items-center justify-center gap-2.5 shadow-sm active:scale-95 transition-all cursor-pointer"
             >
               <AlertTriangle className="w-4 h-4" />
               <span>Report an Emergency Now</span>
@@ -99,17 +102,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onSelectIn
 
             <button
               onClick={() => onNavigate('citizen-live')}
-              className="px-6 py-3.5 bg-white border border-[#D9E0E7] hover:bg-[#F7F8FA] text-[#101828] font-semibold text-sm rounded-lg flex items-center justify-center gap-2 transition-colors cursor-pointer"
+              className="px-6 py-3.5 bg-white border border-slate-300 hover:bg-slate-50 hover:border-slate-400 text-slate-800 font-semibold text-sm rounded-lg flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95 cursor-pointer"
             >
-              <Compass className="w-4 h-4 text-[#2563EB]" />
+              <Compass className="w-4 h-4 text-blue-600" />
               <span>Explore Live Incident Grid</span>
             </button>
 
             <button
               onClick={() => onNavigate('command-login')}
-              className="px-4 py-3.5 text-[#52606D] hover:text-[#101828] text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors sm:ml-auto"
+              className="px-4 py-3.5 text-slate-500 hover:text-slate-900 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors sm:ml-auto"
             >
-              <Radio className="w-3.5 h-3.5 text-[#2563EB]" />
+              <Radio className="w-3.5 h-3.5 text-blue-600" />
               <span>Operator CAD Login</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
@@ -133,12 +136,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onSelectIn
 
       {/* Operational Jaipur Map & Live Grid Preview */}
       <section className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#D9E0E7] pb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3">
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-[#101828] font-heading">
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 font-heading">
               Live Jaipur Operational Grid
             </h2>
-            <p className="text-xs text-[#52606D] mt-0.5">
+            <p className="text-sm text-slate-500 mt-1">
               Verified spatial perimeters, evacuation cordons, and active response deployments.
             </p>
           </div>

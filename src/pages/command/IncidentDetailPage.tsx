@@ -133,9 +133,9 @@ export const IncidentDetailPage: React.FC<IncidentDetailPageProps> = ({
       </div>
 
       {/* Main Incident Dossier Header Card */}
-      <div className="bg-white border border-[#D9E0E7] rounded-xl p-5 sm:p-6 shadow-xs space-y-4">
+      <div className="bg-white border border-slate-200 rounded-xl p-5 sm:p-6 shadow-sm space-y-4">
         {/* Top Badges & Status Selector */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#D9E0E7] pb-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4">
           <div className="flex flex-wrap items-center gap-2.5 font-mono-data">
             <span className="text-base font-bold text-slate-900 bg-slate-100 px-2.5 py-1 rounded border border-slate-200">
               {incident.code}
@@ -167,10 +167,10 @@ export const IncidentDetailPage: React.FC<IncidentDetailPageProps> = ({
         {/* Title, Geocoded Coordinates, & Dispatch CTA */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1.5">
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#101828] font-heading tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 font-heading tracking-tight">
               {incident.title}
             </h1>
-            <div className="flex flex-wrap items-center gap-3 text-xs text-[#52606D]">
+            <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
               <div className="flex items-center gap-1.5 text-red-600 font-semibold">
                 <MapPin className="w-4 h-4 shrink-0" />
                 <span>{incident.location.address}</span>
@@ -193,7 +193,7 @@ export const IncidentDetailPage: React.FC<IncidentDetailPageProps> = ({
           <div className="flex gap-2">
             <button
               onClick={() => setIsAssignModalOpen(true)}
-              className="px-5 py-2.5 bg-[#2563EB] hover:bg-blue-700 text-white rounded text-xs font-bold flex items-center gap-2 transition-colors self-start md:self-auto shadow-xs cursor-pointer"
+              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-bold flex items-center gap-2 transition-colors self-start md:self-auto shadow-sm cursor-pointer active:scale-95"
             >
               <Truck className="w-4 h-4" />
               <span>Dispatch & Assign Units</span>
@@ -207,9 +207,9 @@ export const IncidentDetailPage: React.FC<IncidentDetailPageProps> = ({
         {/* LEFT 2 COLUMNS: Operational Dossier, Signals, Evidence, Corroboration & Timeline */}
         <div className="lg:col-span-2 space-y-5">
           {/* Situation Description & Public Broadcast Summary */}
-          <div className="bg-white border border-[#D9E0E7] rounded-xl p-5 shadow-xs space-y-3">
+          <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-3">
             <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[#101828] font-mono-data">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 font-mono-data">
                 Operational Situation Assessment
               </h3>
               <span className="text-[10px] font-mono-data text-slate-500">
@@ -231,10 +231,10 @@ export const IncidentDetailPage: React.FC<IncidentDetailPageProps> = ({
           </div>
 
           {/* AI-Assisted Observations & Multi-Signal Sensor Fusion */}
-          <div className="bg-white border border-[#D9E0E7] rounded-xl p-5 shadow-xs space-y-3">
+          <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-3">
             <div className="flex items-center justify-between border-b border-slate-100 pb-2">
               <div className="flex items-center gap-2">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#101828] font-mono-data">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 font-mono-data">
                   AI Observations & Signal Fusion
                 </h3>
                 <span className="text-[9px] px-2 py-0.5 bg-blue-50 text-blue-700 font-mono-data font-bold rounded border border-blue-200 flex items-center gap-1">
@@ -282,9 +282,9 @@ export const IncidentDetailPage: React.FC<IncidentDetailPageProps> = ({
           </div>
 
           {/* Evidence Vault & Citizen Corroboration */}
-          <div className="bg-white border border-[#D9E0E7] rounded-xl p-5 shadow-xs space-y-4">
+          <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[#101828] font-mono-data">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 font-mono-data">
                 Evidence & Signal Corroboration
               </h3>
               <span className="text-[10px] font-mono-data text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 font-bold">
@@ -362,9 +362,9 @@ export const IncidentDetailPage: React.FC<IncidentDetailPageProps> = ({
           </div>
 
           {/* Event Timeline (Chronological Audit Log) */}
-          <div className="bg-white border border-[#D9E0E7] rounded-xl p-5 shadow-xs space-y-4">
+          <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[#101828] font-mono-data">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 font-mono-data">
                 Event Timeline & CAD Audit Trail
               </h3>
               <span className="text-[10px] font-mono-data text-slate-500">
@@ -375,7 +375,7 @@ export const IncidentDetailPage: React.FC<IncidentDetailPageProps> = ({
             <div className="relative pl-6 space-y-4 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
               {timelineEvents.map((evt, idx) => (
                 <div key={evt.id || idx} className="relative space-y-1">
-                  <div className="absolute -left-6 top-1 w-3 h-3 rounded-full bg-[#0B1F33] border-2 border-white"></div>
+                  <div className="absolute -left-6 top-1 w-3 h-3 rounded-full bg-slate-900 border-2 border-white"></div>
                   <div className="flex items-center justify-between text-[11px] font-mono-data">
                     <span className="font-bold text-slate-900">{evt.title}</span>
                     <span className="text-slate-500">{evt.timestamp}</span>
@@ -393,24 +393,24 @@ export const IncidentDetailPage: React.FC<IncidentDetailPageProps> = ({
         {/* RIGHT COLUMN: Priority Breakdown, Recommended Resources, Assigned Units */}
         <div className="space-y-5">
           {/* Algorithmic Severity Score Breakdown */}
-          <div className="bg-white border border-[#D9E0E7] rounded-xl p-5 shadow-xs space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[#101828] font-mono-data">
+          <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 font-mono-data">
               Algorithmic Severity Score
             </h3>
 
             <div className="flex items-end justify-between">
-              <span className="text-3xl font-bold font-heading text-[#D92D20] leading-none">
+              <span className="text-3xl font-bold font-heading text-red-600 leading-none">
                 {incident.priority.overall}
                 <span className="text-xs text-slate-400 font-sans font-medium">/100</span>
               </span>
-              <span className="text-xs font-bold font-mono-data px-2.5 py-0.5 bg-red-50 text-[#D92D20] border border-red-200 rounded">
+              <span className="text-xs font-bold font-mono-data px-2.5 py-0.5 bg-red-50 text-red-700 border border-red-200 rounded">
                 {incident.priority.tier}
               </span>
             </div>
 
             <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
               <div
-                className="h-full bg-[#D92D20]"
+                className="h-full bg-red-600"
                 style={{ width: `${incident.priority.overall}%` }}
               />
             </div>
@@ -442,8 +442,8 @@ export const IncidentDetailPage: React.FC<IncidentDetailPageProps> = ({
           </div>
 
           {/* Recommended Resources */}
-          <div className="bg-white border border-[#D9E0E7] rounded-xl p-5 shadow-xs space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[#101828] font-mono-data">
+          <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-3">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 font-mono-data">
               AI Recommended Resources
             </h3>
             <div className="space-y-2">
@@ -468,14 +468,14 @@ export const IncidentDetailPage: React.FC<IncidentDetailPageProps> = ({
           </div>
 
           {/* Assigned Fleet Units */}
-          <div className="bg-white border border-[#D9E0E7] rounded-xl p-5 shadow-xs space-y-3">
+          <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[#101828] font-mono-data">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 font-mono-data">
                 Active Assigned Fleet ({assignedUnits.length})
               </h3>
               <button
                 onClick={() => setIsAssignModalOpen(true)}
-                className="text-xs font-bold text-[#2563EB] hover:underline cursor-pointer"
+                className="text-xs font-bold text-blue-600 hover:underline cursor-pointer"
               >
                 + Assign Unit
               </button>

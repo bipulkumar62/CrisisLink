@@ -228,10 +228,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           }`}
         >
           {/* Header */}
-          <div className="p-3 border-b border-[#D9E0E7] bg-slate-50 flex items-center justify-between shrink-0">
+          <div className="p-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-red-600"></span>
-              <h3 className="text-xs font-bold tracking-wider text-[#101828] uppercase font-mono-data">
+              <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
+              <h3 className="text-xs font-bold tracking-wider text-slate-800 uppercase font-mono-data">
                 Active Queue ({activeIncidents.length})
               </h3>
             </div>
@@ -258,28 +258,16 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                       setMobileTab('overview');
                     }
                   }}
-                  className={`p-3 relative cursor-pointer transition-all ${
+                  className={`p-3 relative cursor-pointer transition-colors border-l-4 ${
                     isSelected
-                      ? 'bg-[#0B1F33] text-white shadow-xs'
-                      : 'bg-white hover:bg-slate-50 text-[#101828]'
+                      ? 'bg-slate-100 border-l-blue-600'
+                      : 'bg-white hover:bg-slate-50 border-l-transparent'
                   }`}
                 >
-                  <div
-                    className={`absolute left-0 top-0 bottom-0 w-1.5 ${
-                      isSelected
-                        ? 'bg-[#2563EB]'
-                        : inc.severity === 'CRITICAL'
-                        ? 'bg-[#D92D20]'
-                        : inc.severity === 'HIGH'
-                        ? 'bg-[#D97706]'
-                        : 'bg-slate-300'
-                    }`}
-                  />
-
-                  <div className="flex justify-between items-start mb-1 ml-2">
+                  <div className="flex justify-between items-start mb-1 ml-1">
                     <span
-                      className={`font-mono-data text-xs font-bold ${
-                        isSelected ? 'text-blue-300' : 'text-slate-700'
+                      className={`font-mono-data text-[11px] font-bold ${
+                        isSelected ? 'text-blue-700' : 'text-slate-600'
                       }`}
                     >
                       {inc.code}
@@ -288,25 +276,29 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                   </div>
 
                   <h4
-                    className={`text-xs font-bold ml-2 leading-tight ${
-                      isSelected ? 'text-white' : 'text-[#101828]'
+                    className={`text-sm font-bold ml-1 leading-tight mb-2 ${
+                      isSelected ? 'text-slate-900' : 'text-slate-800'
                     }`}
                   >
                     {inc.title}
                   </h4>
 
-                  <div className="flex items-center justify-between mt-2 ml-2 text-[10px] font-mono-data">
+                  <div className="flex items-center justify-between mt-2 ml-1 text-[10px] font-mono-data">
                     <div className="flex items-center gap-1.5">
                       <Clock
-                        className={`w-3 h-3 ${isSelected ? 'text-slate-400' : 'text-[#52606D]'}`}
+                        className={`w-3 h-3 ${isSelected ? 'text-blue-500' : 'text-slate-400'}`}
                       />
-                      <span className={isSelected ? 'text-slate-300' : 'text-[#52606D]'}>
+                      <span className={isSelected ? 'text-blue-700' : 'text-slate-500'}>
                         {formatRelativeTime(inc.reportedAt)}
                       </span>
                     </div>
                     <span
-                      className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
-                        isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'
+                      className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                        inc.priority.overall >= 80 
+                          ? 'bg-red-50 text-red-700 border border-red-200' 
+                          : inc.priority.overall >= 60 
+                          ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                          : 'bg-slate-100 text-slate-600 border border-slate-200'
                       }`}
                     >
                       {inc.priority.overall}/100 Risk
@@ -406,21 +398,21 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         {/* RIGHT COLUMN: Selected Incident Panel */}
         {currentIncident && (
           <div
-            className={`w-full lg:w-96 shrink-0 bg-white border-t lg:border-t-0 lg:border-l border-[#D9E0E7] flex flex-col overflow-hidden shadow-xs z-20 ${
+            className={`w-full lg:w-[380px] shrink-0 bg-white border-t lg:border-t-0 lg:border-l border-slate-200 flex flex-col overflow-hidden shadow-lg z-20 ${
               mobileTab === 'overview' ? 'flex' : 'hidden lg:flex'
             }`}
           >
-            {/* Panel Header */}
-            <div className="p-4 border-b border-[#D9E0E7] bg-white flex flex-col gap-2 shrink-0">
+            {/* Sticky Panel Header */}
+            <div className="p-4 border-b border-slate-200 bg-slate-50 flex flex-col gap-2 shrink-0 shadow-sm z-10">
               <div className="flex justify-between items-start">
                 <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-mono-data text-xs font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="font-mono-data text-[11px] font-bold text-slate-700 bg-white px-2 py-0.5 rounded border border-slate-200 shadow-sm">
                       {currentIncident.code}
                     </span>
                     <StatusBadge severity={currentIncident.severity} />
                   </div>
-                  <h2 className="font-heading text-base font-bold text-[#101828] leading-snug">
+                  <h2 className="font-heading text-lg font-bold text-slate-900 leading-snug">
                     {currentIncident.title}
                   </h2>
                 </div>
@@ -430,20 +422,20 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                     onNavigate('command-incident-detail');
                   }}
                   title="Full deep-dive view"
-                  className="p-1.5 text-[#52606D] hover:text-[#101828] rounded hover:bg-slate-100 transition-colors border border-slate-200"
+                  className="p-1.5 text-slate-400 hover:text-blue-600 rounded-md hover:bg-white transition-colors border border-transparent hover:border-slate-200 hover:shadow-sm"
                 >
                   <MoreVertical className="w-4 h-4" />
                 </button>
               </div>
 
-              <div className="flex items-center gap-1.5 text-[#52606D] text-xs">
-                <MapPin className="w-3.5 h-3.5 text-red-500 shrink-0" />
-                <span className="truncate">{currentIncident.location.address}</span>
+              <div className="flex items-center gap-1.5 text-slate-600 text-xs mt-1">
+                <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <span className="truncate font-medium">{currentIncident.location.address}</span>
               </div>
             </div>
 
             {/* Panel Scrollable Content */}
-            <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 bg-white">
+            <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-5 bg-white">
               {/* Intelligence Overview Grid */}
               <div className="grid grid-cols-2 gap-2">
                 <div className="bg-[#F7F8FA] p-2.5 border border-[#D9E0E7] rounded flex flex-col gap-0.5">
@@ -495,111 +487,120 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                 </div>
               </div>
 
-              {/* AI-Assisted Observations Clearly Labeled */}
-              <div className="flex flex-col gap-1.5">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-bold text-[#101828] uppercase font-mono-data tracking-wider">
-                    AI Observations
-                  </h3>
-                  <span className="text-[9px] px-1.5 py-0.5 bg-blue-50 text-[#2563EB] rounded border border-blue-200 flex items-center gap-1 font-semibold">
-                    <Bot className="w-3 h-3" />
-                    AI-Assisted Observations
-                  </span>
-                </div>
-
-                <div className="p-2 bg-blue-50/70 border border-blue-200 rounded text-[11px] text-blue-900 leading-snug font-medium">
-                  ⚠️ AI-assisted observations — Human confirmation recommended
-                </div>
-
-                <div className="flex flex-col gap-1.5 border border-[#D9E0E7] rounded bg-white p-2">
-                  {currentIncident.signals.map((sig) => (
-                    <div
-                      key={sig.id}
-                      className={`flex items-start gap-2 p-2 rounded text-xs leading-tight ${
-                        sig.type === 'CRITICAL_BLOCK'
-                          ? 'bg-red-50 text-red-950 border border-red-200'
-                          : 'bg-slate-50 text-slate-800 border border-slate-200'
-                      }`}
-                    >
-                      {sig.type === 'CRITICAL_BLOCK' ? (
-                        <AlertOctagon className="w-3.5 h-3.5 text-[#D92D20] shrink-0 mt-0.5" />
-                      ) : sig.type === 'WARNING' ? (
-                        <AlertTriangle className="w-3.5 h-3.5 text-[#D97706] shrink-0 mt-0.5" />
-                      ) : (
-                        <Zap className="w-3.5 h-3.5 text-[#2563EB] shrink-0 mt-0.5" />
-                      )}
-                      <span>{sig.message}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
               {/* Priority Score Breakdown */}
-              <div className="flex flex-col gap-1.5">
-                <h3 className="text-xs font-bold text-[#101828] uppercase font-mono-data tracking-wider">
-                  Priority Score
+              <div className="flex flex-col gap-2">
+                <h3 className="text-[10px] font-bold text-slate-500 uppercase font-mono-data tracking-widest border-b border-slate-100 pb-1">
+                  System Priority Assessment
                 </h3>
-                <div className="border border-[#D9E0E7] rounded p-3 bg-white flex flex-col gap-2.5">
+                <div className="border border-slate-200 rounded-md p-3 bg-slate-50 flex flex-col gap-3">
                   <div className="flex justify-between items-end">
-                    <span className="font-heading text-2xl font-bold text-[#D92D20] leading-none">
+                    <span className="font-heading text-3xl font-bold text-slate-900 leading-none">
                       {currentIncident.priority.overall}
-                      <span className="text-xs text-[#52606D] font-sans font-medium">/100</span>
+                      <span className="text-sm text-slate-400 font-sans font-medium">/100</span>
                     </span>
-                    <span className="text-[10px] font-bold text-[#D92D20] uppercase font-mono-data bg-red-50 px-2 py-0.5 rounded border border-red-200">
+                    <span className={`text-[10px] font-bold uppercase font-mono-data px-2 py-1 rounded border ${
+                      currentIncident.priority.overall >= 80 
+                        ? 'bg-red-50 text-red-700 border-red-200' 
+                        : currentIncident.priority.overall >= 60 
+                        ? 'bg-amber-50 text-amber-700 border-amber-200'
+                        : 'bg-slate-100 text-slate-600 border-slate-200'
+                    }`}>
                       {currentIncident.priority.tier}
                     </span>
                   </div>
 
-                  <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden flex">
+                  <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden flex shadow-inner">
                     <div
-                      className="h-full bg-[#D92D20]"
+                      className={`h-full transition-all duration-500 ${
+                        currentIncident.priority.overall >= 80 ? 'bg-red-600' : currentIncident.priority.overall >= 60 ? 'bg-amber-500' : 'bg-blue-500'
+                      }`}
                       style={{ width: `${currentIncident.priority.overall}%` }}
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 text-xs font-mono-data pt-1 border-t border-slate-100">
-                    <div className="flex justify-between items-center text-[#52606D]">
+                  <div className="grid grid-cols-2 gap-3 text-[11px] font-mono-data pt-2 border-t border-slate-200">
+                    <div className="flex justify-between items-center text-slate-600">
                       <span>Life Threat</span>
-                      <span className="font-bold text-[#101828]">
+                      <span className={`font-bold ${currentIncident.priority.lifeThreatRisk === 'Severe' || currentIncident.priority.lifeThreatRisk === 'High' ? 'text-red-600' : 'text-slate-900'}`}>
                         {currentIncident.priority.lifeThreatRisk}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center text-[#52606D]">
+                    <div className="flex justify-between items-center text-slate-600">
                       <span>Infrastructure</span>
-                      <span className="font-bold text-[#D92D20]">
+                      <span className={`font-bold ${currentIncident.priority.infrastructureRisk === 'Severe' || currentIncident.priority.infrastructureRisk === 'High' ? 'text-red-600' : 'text-slate-900'}`}>
                         {currentIncident.priority.infrastructureRisk}
                       </span>
                     </div>
                   </div>
                 </div>
               </div>
+
+              {/* AI-Assisted Observations Clearly Labeled */}
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-1">
+                  <h3 className="text-[10px] font-bold text-slate-500 uppercase font-mono-data tracking-widest">
+                    Machine Intelligence
+                  </h3>
+                  <span className="text-[9px] px-1.5 py-0.5 bg-indigo-50 text-indigo-700 rounded border border-indigo-200 flex items-center gap-1 font-semibold">
+                    <Bot className="w-3 h-3" />
+                    AI Aggregated
+                  </span>
+                </div>
+
+                <div className="p-2 bg-amber-50/70 border border-amber-200 rounded-md text-[11px] text-amber-900 leading-snug font-medium flex gap-2 items-start">
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
+                  <span>AI-assisted observations require human operator verification before dispatch.</span>
+                </div>
+
+                <div className="flex flex-col gap-1.5 border border-slate-200 rounded-md bg-slate-50 p-2 shadow-sm">
+                  {currentIncident.signals.map((sig) => (
+                    <div
+                      key={sig.id}
+                      className={`flex items-start gap-2 p-2 rounded-md text-xs leading-tight ${
+                        sig.type === 'CRITICAL_BLOCK'
+                          ? 'bg-red-50 text-red-900 border border-red-100'
+                          : 'bg-white text-slate-800 border border-slate-100 shadow-sm'
+                      }`}
+                    >
+                      {sig.type === 'CRITICAL_BLOCK' ? (
+                        <AlertOctagon className="w-3.5 h-3.5 text-red-600 shrink-0 mt-0.5" />
+                      ) : sig.type === 'WARNING' ? (
+                        <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
+                      ) : (
+                        <Zap className="w-3.5 h-3.5 text-blue-500 shrink-0 mt-0.5" />
+                      )}
+                      <span>{sig.message}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* Action Footer */}
-            <div className="p-4 border-t border-[#D9E0E7] bg-slate-50 shrink-0 flex flex-col gap-2.5">
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-bold text-[#52606D] uppercase font-mono-data">
-                  Recommended Units
+            <div className="p-4 border-t border-slate-200 bg-white shrink-0 flex flex-col gap-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-10">
+              <div className="flex flex-col gap-1.5">
+                <span className="text-[10px] font-bold text-slate-500 uppercase font-mono-data tracking-widest">
+                  System Recommended Units
                 </span>
                 <div className="flex flex-wrap gap-1.5">
                   {currentIncident.recommendedResources.map((rec) => (
                     <span
                       key={rec.unitId}
-                      className="font-mono-data text-[10px] px-2 py-0.5 bg-blue-50 border border-blue-200 text-[#2563EB] rounded flex items-center gap-1 font-semibold"
+                      className="font-mono-data text-[10px] px-2 py-1 bg-slate-100 border border-slate-200 text-slate-700 rounded-md flex items-center gap-1.5 font-semibold"
                     >
-                      <Shield className="w-3 h-3 text-[#2563EB]" />
+                      <Shield className="w-3 h-3 text-slate-500" />
                       {rec.name}
                     </span>
                   ))}
                 </div>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex gap-2 pt-1">
                 <button
                   onClick={() => setIsAssignModalOpen(true)}
-                  className="flex-1 py-2 bg-[#2563EB] hover:bg-blue-700 text-white rounded transition-colors text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs"
+                  className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-all text-xs font-bold flex items-center justify-center gap-2 shadow-sm active:scale-95"
                 >
-                  <Truck className="w-3.5 h-3.5" />
+                  <Truck className="w-4 h-4" />
                   <span>Dispatch Resource</span>
                 </button>
                 <button
@@ -607,9 +608,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                     onSelectIncidentDetail(currentIncident.code);
                     onNavigate('command-incident-detail');
                   }}
-                  className="px-3 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded transition-colors text-xs font-bold flex items-center justify-center gap-1 shadow-xs"
+                  className="px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 rounded-md transition-all text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm active:scale-95"
                 >
-                  <ExternalLink className="w-3.5 h-3.5" />
+                  <ExternalLink className="w-4 h-4" />
                   <span>Detail</span>
                 </button>
               </div>

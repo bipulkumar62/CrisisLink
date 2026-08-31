@@ -46,12 +46,12 @@ function AppContent() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#fbf9fb] text-[#1b1c1d] font-sans antialiased">
+    <div className={`${isDashboardOrMap ? 'h-[100dvh] overflow-hidden' : 'min-h-screen'} flex flex-col bg-[#fbf9fb] text-[#1b1c1d] font-sans antialiased relative`}>
       {/* Universal Top Navigation */}
       <TopNavBar currentRoute={currentRoute} onNavigate={handleNavigate} />
 
       {/* Main Container Layout */}
-      <div className={`flex-1 flex pt-16 ${isDashboardOrMap ? 'h-[calc(100vh)]' : ''}`}>
+      <div className={`flex-1 flex pt-[68px] ${isDashboardOrMap ? 'h-full' : ''}`}>
         {/* Command Center Operational Sidebar */}
         {isCommandRoute && (
           <SideNavBar currentRoute={currentRoute} onNavigate={handleNavigate} />
@@ -59,9 +59,7 @@ function AppContent() {
 
         {/* Page Content Viewport */}
         <main
-          className={`flex-1 flex flex-col ${
-            isCommandRoute ? 'lg:pl-64' : ''
-          } ${isDashboardOrMap ? 'overflow-hidden' : 'px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto w-full'}`}
+          className={`flex-1 flex flex-col min-w-0 ${isDashboardOrMap ? 'overflow-hidden h-full' : 'px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto w-full'}`}
         >
           {/* CITIZEN PORTAL ROUTES */}
           {currentRoute === 'citizen-landing' && (

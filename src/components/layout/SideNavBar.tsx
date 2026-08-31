@@ -56,17 +56,17 @@ export const SideNavBar: React.FC<SideNavBarProps> = ({ currentRoute, onNavigate
   ];
 
   return (
-    <aside className="hidden lg:flex flex-col fixed left-0 top-0 h-full w-64 z-40 p-4 pt-20 bg-[#fbf9fb] border-r border-[#c4c6cd]/60 select-none">
+    <aside className="hidden lg:flex flex-col w-64 shrink-0 h-full z-40 p-4 bg-slate-50 border-r border-slate-200 select-none">
       {/* Sidebar Header */}
       <div className="mb-6 px-2 flex items-center gap-3">
-        <div className="w-9 h-9 bg-[#0b1f33] rounded flex items-center justify-center text-white shadow-xs">
-          <Shield className="w-5 h-5 fill-current text-blue-400" />
+        <div className="w-9 h-9 bg-slate-900 rounded-md flex items-center justify-center text-white shadow-sm">
+          <Shield className="w-5 h-5 fill-current text-blue-500" />
         </div>
         <div>
-          <h2 className="font-heading text-sm font-bold text-[#00050e] leading-tight">
+          <h2 className="font-heading text-sm font-bold text-slate-900 leading-tight">
             CrisisLink
           </h2>
-          <p className="text-[10px] font-bold text-[#74777d] uppercase tracking-wider">
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
             Operational Hub
           </p>
         </div>
@@ -74,9 +74,9 @@ export const SideNavBar: React.FC<SideNavBarProps> = ({ currentRoute, onNavigate
 
       {/* Operator Badge */}
       {user && (
-        <div className="mb-4 p-2.5 bg-white border border-[#c4c6cd]/70 rounded text-xs flex items-center justify-between">
+        <div className="mb-4 p-2.5 bg-white border border-slate-200 rounded-md text-xs flex items-center justify-between shadow-xs">
           <div className="flex items-center gap-2 overflow-hidden">
-            <UserCheck className="w-3.5 h-3.5 text-[#0051d5] shrink-0" />
+            <UserCheck className="w-3.5 h-3.5 text-blue-600 shrink-0" />
             <div className="truncate">
               <span className="font-bold text-slate-800 block truncate">{user.name}</span>
               <span className="text-[10px] text-slate-500 font-mono-data">
@@ -87,7 +87,7 @@ export const SideNavBar: React.FC<SideNavBarProps> = ({ currentRoute, onNavigate
           <button
             onClick={() => logout()}
             title="Log out"
-            className="p-1 text-slate-400 hover:text-red-600 rounded transition-colors"
+            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
           >
             <LogOut className="w-3.5 h-3.5" />
           </button>
@@ -103,13 +103,13 @@ export const SideNavBar: React.FC<SideNavBarProps> = ({ currentRoute, onNavigate
             <button
               key={item.id}
               onClick={() => onNavigate(item.id)}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded text-xs font-semibold transition-all text-left ${
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-xs font-semibold transition-all text-left ${
                 isActive
-                  ? 'bg-[#316bf3] text-white shadow-xs'
-                  : 'text-[#44474c] hover:bg-[#e4e2e4]/70 hover:text-[#00050e]'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-slate-600 hover:bg-slate-200/50 hover:text-slate-900'
               }`}
             >
-              <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-[#74777d]'}`} />
+              <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
               <span className="truncate">{item.label}</span>
             </button>
           );
@@ -117,19 +117,19 @@ export const SideNavBar: React.FC<SideNavBarProps> = ({ currentRoute, onNavigate
       </nav>
 
       {/* Footer support & status */}
-      <div className="mt-auto flex flex-col gap-1 border-t border-[#c4c6cd]/40 pt-4">
+      <div className="mt-auto flex flex-col gap-1 border-t border-slate-200 pt-4">
         <button
           onClick={() => onNavigate('citizen-status')}
-          className="flex items-center gap-3 px-3 py-2 text-xs font-semibold text-[#44474c] hover:bg-[#e4e2e4] rounded transition-colors text-left"
+          className="flex items-center gap-3 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-200/50 hover:text-slate-900 rounded-md transition-colors text-left"
         >
-          <Radio className="w-4 h-4 text-[#74777d]" />
+          <Radio className="w-4 h-4 text-slate-400" />
           <span>Network Status</span>
         </button>
         <button
           onClick={() => onNavigate('citizen-landing')}
-          className="flex items-center gap-3 px-3 py-2 text-xs font-semibold text-[#44474c] hover:bg-[#e4e2e4] rounded transition-colors text-left"
+          className="flex items-center gap-3 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-200/50 hover:text-slate-900 rounded-md transition-colors text-left"
         >
-          <HelpCircle className="w-4 h-4 text-[#74777d]" />
+          <HelpCircle className="w-4 h-4 text-slate-400" />
           <span>Public Portal Home</span>
         </button>
       </div>

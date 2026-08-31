@@ -22,11 +22,11 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({ currentRoute, onNavigate }
   };
 
   return (
-    <header className="fixed top-0 left-0 w-full z-50 flex flex-col bg-white border-b border-[#D9E0E7]">
+    <header className="fixed top-0 left-0 w-full z-50 flex flex-col bg-white border-b border-slate-200">
       {/* Topmost Prototype & Regional Simulation Alert Bar */}
-      <div className="bg-[#0B1F33] text-[#F7F8FA] px-3 sm:px-6 py-1 text-[11px] flex items-center justify-between font-mono-data border-b border-[#0B1F33]/40">
+      <div className="bg-slate-900 text-slate-100 px-3 sm:px-6 py-1.5 text-[11px] flex items-center justify-between font-mono-data border-b border-slate-950/40">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-[#16803A] animate-pulse shrink-0"></span>
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
           <span className="font-semibold text-white tracking-wide">
             {APP_CONFIG.REGION_LABEL}
           </span>
@@ -36,10 +36,10 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({ currentRoute, onNavigate }
           </span>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-slate-300 hidden md:inline">
-            Direct Helpline: <span className="text-white font-bold">{APP_CONFIG.HOTLINE_EMERGENCY}</span> (National Emergency)
+          <span className="text-slate-400 hidden md:inline">
+            Direct Helpline: <span className="text-white font-bold">{APP_CONFIG.HOTLINE_EMERGENCY}</span>
           </span>
-          <span className="text-xs px-1.5 py-0.2 bg-[#2563EB] text-white rounded font-bold uppercase tracking-wider">
+          <span className="text-[10px] px-1.5 py-0.5 bg-blue-600 text-white rounded font-bold uppercase tracking-wider">
             Live Feed
           </span>
         </div>
@@ -51,54 +51,54 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({ currentRoute, onNavigate }
         <div className="flex items-center gap-4 lg:gap-6">
           <button
             onClick={() => handleNav('citizen-landing')}
-            className="flex items-center gap-2.5 text-left group cursor-pointer focus:outline-hidden"
+            className="flex items-center gap-3 text-left group cursor-pointer focus:outline-none"
           >
-            <div className="w-8 h-8 rounded bg-[#0B1F33] flex items-center justify-center text-white shadow-xs group-hover:bg-[#2563EB] transition-colors">
-              <Shield className="w-4 h-4 fill-current" />
+            <div className="w-8 h-8 rounded-md bg-slate-900 flex items-center justify-center text-white shadow-sm group-hover:bg-blue-700 transition-colors">
+              <Shield className="w-4 h-4 fill-current text-blue-400 group-hover:text-white transition-colors" />
             </div>
             <div>
-              <span className="font-heading text-base sm:text-lg font-bold tracking-tight text-[#101828] leading-none block">
+              <span className="font-heading text-lg font-bold tracking-tight text-slate-900 leading-none block">
                 CrisisLink
               </span>
-              <span className="text-[10px] uppercase font-bold tracking-wider text-[#52606D] block">
+              <span className="text-[10px] uppercase font-bold tracking-widest text-slate-500 block mt-0.5">
                 Jaipur Municipal Grid
               </span>
             </div>
           </button>
 
           {/* Desktop Nav Links */}
-          <nav className="hidden md:flex items-center gap-1 pl-3 border-l border-[#D9E0E7] h-7">
+          <nav className="hidden md:flex items-center gap-1 pl-4 ml-2 border-l border-slate-200 h-8">
             <button
               onClick={() => handleNav('citizen-landing')}
-              className={`px-2.5 py-1 text-xs font-semibold rounded transition-colors ${
+              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${
                 currentRoute === 'citizen-landing'
-                  ? 'text-[#2563EB] bg-blue-50 font-bold'
-                  : 'text-[#52606D] hover:text-[#101828] hover:bg-[#F7F8FA]'
+                  ? 'text-blue-700 bg-blue-50'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
             >
               Overview
             </button>
             <button
               onClick={() => handleNav('citizen-live')}
-              className={`px-2.5 py-1 text-xs font-semibold rounded transition-colors flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors flex items-center gap-1.5 ${
                 currentRoute === 'citizen-live'
-                  ? 'text-[#2563EB] bg-blue-50 font-bold'
-                  : 'text-[#52606D] hover:text-[#101828] hover:bg-[#F7F8FA]'
+                  ? 'text-blue-700 bg-blue-50'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
             >
               <span>Live Incidents</span>
               {criticalCount > 0 && (
-                <span className="px-1.5 py-0.2 bg-[#D92D20] text-white text-[10px] rounded-full font-mono-data font-bold">
+                <span className="px-1.5 py-0.5 bg-red-600 text-white text-[10px] rounded-full font-mono-data font-bold leading-none">
                   {criticalCount}
                 </span>
               )}
             </button>
             <button
               onClick={() => handleNav('citizen-status')}
-              className={`px-2.5 py-1 text-xs font-semibold rounded transition-colors ${
+              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${
                 currentRoute === 'citizen-status'
-                  ? 'text-[#2563EB] bg-blue-50 font-bold'
-                  : 'text-[#52606D] hover:text-[#101828] hover:bg-[#F7F8FA]'
+                  ? 'text-blue-700 bg-blue-50'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
             >
               System Telemetry
@@ -111,24 +111,24 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({ currentRoute, onNavigate }
           {/* Command Center Access */}
           <button
             onClick={() => handleNav(user ? 'command-dashboard' : 'command-login')}
-            className={`px-3 py-1.5 border rounded text-xs font-semibold transition-colors flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 border rounded-md text-xs font-semibold transition-colors flex items-center gap-1.5 ${
               isCommandView
-                ? 'bg-[#0B1F33] text-white border-[#0B1F33]'
-                : 'bg-white text-[#101828] border-[#D9E0E7] hover:bg-[#F7F8FA]'
+                ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
             }`}
           >
-            <Radio className="w-3.5 h-3.5 text-[#2563EB]" />
+            <Radio className={`w-3.5 h-3.5 ${isCommandView ? 'text-blue-400' : 'text-blue-600'}`} />
             <span className="hidden sm:inline">Command Center</span>
             <span className="sm:hidden">CAD</span>
             {user && (
-              <span className="w-1.5 h-1.5 rounded-full bg-[#16803A]"></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
             )}
           </button>
 
           {/* Report Emergency Primary Action Button */}
           <button
             onClick={() => handleNav('citizen-report')}
-            className="px-3.5 py-1.5 bg-[#2563EB] hover:bg-[#1d4ed8] text-white rounded text-xs font-bold flex items-center gap-1.5 shadow-xs shadow-blue-500/20 active:scale-98"
+            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-bold flex items-center gap-1.5 shadow-sm active:scale-95 transition-all"
           >
             <AlertTriangle className="w-3.5 h-3.5" />
             <span className="whitespace-nowrap">Report Emergency</span>
