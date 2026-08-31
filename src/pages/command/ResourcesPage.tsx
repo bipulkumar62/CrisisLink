@@ -132,7 +132,7 @@ export const ResourcesPage: React.FC<ResourcesPageProps> = ({ onNavigate }) => {
         </div>
 
         {/* Global summary counters */}
-        <div className="flex items-center gap-3 text-xs font-mono-data bg-white p-3 border border-[#D9E0E7] rounded-xl shadow-xs">
+        <div className="flex flex-wrap items-center gap-3 text-xs font-mono-data bg-white p-3 border border-[#D9E0E7] rounded-xl shadow-xs">
           <div>
             <span className="text-slate-400 block text-[10px] uppercase font-bold">Available:</span>
             <span className="font-bold text-[#16803A] text-sm">

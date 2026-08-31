@@ -70,7 +70,7 @@ During major emergencies (e.g. urban flash floods, structural fires, highway col
 | **Database & Realtime** | Supabase PostgreSQL, Supabase Realtime Channels (`postgres_changes`) |
 | **Database Security** | Row-Level Security (RLS) Policies |
 | **AI Subsystem** | Google Gemini API (`@google/genai` / backend server-side integration) |
-| **Mapping Engine** | Normalized Tactical Map Grid / Leaflet + OpenStreetMap (Jaipur municipality bounds) |
+| **Mapping Engine** | MapLibre GL JS + OpenFreeMap Positron vector tiles (no API key required, Jaipur municipality bounds) |
 
 ---
 
@@ -85,7 +85,7 @@ During major emergencies (e.g. urban flash floods, structural fires, highway col
 
 ### 2. Protected Command Center (Desktop-Dense CAD)
 * **Real-time Tactical Dashboard**: Live metrics tracking Critical/High incidents, active emergency units, and resolved cases.
-* **Jaipur Grid Map**: Vector geospatial mesh displaying incident clusters, hazard cordons, and active response vehicle locations.
+* **Jaipur Tactical Grid Map**: MapLibre GL vector map (OpenFreeMap Positron basemap) displaying incident clusters, hazard cordons, evacuation radii, and active response vehicle locations — centered on Jaipur (26.9124° N, 75.7873° E).
 * **Deterministic Severity Engine**: Automated scoring (+40 life-threat, +25 visible fire, +15 road blockages, +15 report velocity) mapping to `LOW`, `MEDIUM`, `HIGH`, `CRITICAL` tiers.
 * **AI Incident Analysis**: Server-side Gemini evaluation extracting structured indicators (`road_blocked`, `visible_fire`, `trapped_vehicle`) — explicitly labeled as *AI-assisted observations (human confirmation recommended)*.
 * **Resource Matching & Dispatch**: Interactive fleet assignment for Ambulances (`EMS`), Rescue Teams (`SDRF`), Fire Engines (`FE`), Police Patrols (`PD`), and Community Shelters.
