@@ -1,9 +1,10 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { Incident, IncidentStatus, IncidentSeverity } from '@/src/types/incident';
 import { CitizenReport, ReportSubmissionPayload } from '@/src/types/report';
 import { ResourceUnit, UnitStatus } from '@/src/types/resource';
 import { SystemTelemetry } from '@/src/types/system';
 import { services } from '@/src/services';
+import { ENV } from '@/src/config/env';
 
 interface EmergencyDataContextType {
   incidents: Incident[];
@@ -74,6 +75,57 @@ export const EmergencyDataProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     refreshData();
+  }, [refreshData]);
+
+  // ─── Supabase Real-time Subscriptions ─────────────────────────────────────
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const realtimeChannel = useRef<any>(null);
+
+  useEffect(() => {
+    if (!ENV.IS_SUPABASE_MODE) return; // Only subscribe when Supabase is active
+
+    // Lazy import to avoid loading supabase client in mock mode
+    import('@/src/lib/supabaseClient').then(({ supabase }) => {
+      const channel = supabase
+        .channel('crisislink-realtime')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'incidents' },
+          () => { refreshData(); }
+        )
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'resources' },
+          () => { refreshData(); }
+        )
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'citizen_reports' },
+          () => { refreshData(); }
+        )
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            console.info('[CrisisLink] 🔴 Real-time channel subscribed — live updates active');
+          }
+        });
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (realtimeChannel as any).current = channel;
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    });
+
+    return () => {
+      import('@/src/lib/supabaseClient').then(({ supabase }) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if ((realtimeChannel as any).current) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          supabase.removeChannel((realtimeChannel as any).current);
+        }
+      });
+    };
   }, [refreshData]);
 
   const selectIncidentById = useCallback(
@@ -179,8 +231,8 @@ export const EmergencyDataProvider: React.FC<{ children: React.ReactNode }> = ({
             location: {
               address: payload.address,
               sector: 'Sector 1 - Central Hub',
-              latitude: payload.latitude || 37.7749,
-              longitude: payload.longitude || -122.4194,
+              latitude: payload.latitude || 26.9124,
+              longitude: payload.longitude || 75.7873,
             },
           });
           setIncidents((prev) => [newIncident, ...prev]);

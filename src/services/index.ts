@@ -1,28 +1,48 @@
 /**
  * Service Layer Dependency Injection & Factory.
- * Seamlessly toggles between isolated mock services and real FastAPI client
- * based on the presence of VITE_API_BASE_URL.
+ *
+ * Priority order:
+ *   1. If VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY are set → use Supabase services (real data)
+ *   2. If VITE_FORCE_MOCK=true → always use mock services
+ *   3. Default fallback → mock services (safe for local dev without credentials)
  */
 
 import { ENV } from '@/src/config/env';
+
+// Interfaces
 import { IIncidentService } from './interfaces/IIncidentService';
 import { IReportService } from './interfaces/IReportService';
 import { IResourceService } from './interfaces/IResourceService';
 import { ISystemService } from './interfaces/ISystemService';
 import { IAuthService } from './interfaces/IAuthService';
 
+// Mock implementations
 import { MockIncidentService } from './mock/mockIncidentService';
 import { MockReportService } from './mock/mockReportService';
 import { MockResourceService } from './mock/mockResourceService';
 import { MockSystemService } from './mock/mockSystemService';
 import { MockAuthService } from './mock/mockAuthService';
 
-// Singleton instances for mock state preservation across component re-renders
+// Supabase implementations
+import { SupabaseIncidentService } from './supabase/SupabaseIncidentService';
+import { SupabaseReportService } from './supabase/SupabaseReportService';
+import { SupabaseResourceService } from './supabase/SupabaseResourceService';
+import { SupabaseSystemService } from './supabase/SupabaseSystemService';
+import { SupabaseAuthService } from './supabase/SupabaseAuthService';
+
+// Singleton mock instances (preserved for state continuity)
 const mockIncidentService = new MockIncidentService();
 const mockReportService = new MockReportService();
 const mockResourceService = new MockResourceService();
 const mockSystemService = new MockSystemService();
 const mockAuthService = new MockAuthService();
+
+// Singleton Supabase instances
+const supabaseIncidentService = new SupabaseIncidentService();
+const supabaseReportService = new SupabaseReportService();
+const supabaseResourceService = new SupabaseResourceService();
+const supabaseSystemService = new SupabaseSystemService();
+const supabaseAuthService = new SupabaseAuthService();
 
 export interface ServiceContainer {
   incidentService: IIncidentService;
@@ -31,29 +51,32 @@ export interface ServiceContainer {
   systemService: ISystemService;
   authService: IAuthService;
   isMockMode: boolean;
+  isSupabaseMode: boolean;
 }
 
 export function createServices(): ServiceContainer {
-  if (ENV.IS_MOCK_MODE) {
+  if (ENV.IS_SUPABASE_MODE) {
+    console.info('[CrisisLink] 🟢 Supabase mode — live data from Supabase project nlpqlvcknpodvcukkddc');
     return {
-      incidentService: mockIncidentService,
-      reportService: mockReportService,
-      resourceService: mockResourceService,
-      systemService: mockSystemService,
-      authService: mockAuthService,
-      isMockMode: true,
+      incidentService: supabaseIncidentService,
+      reportService: supabaseReportService,
+      resourceService: supabaseResourceService,
+      systemService: supabaseSystemService,
+      authService: supabaseAuthService,
+      isMockMode: false,
+      isSupabaseMode: true,
     };
   }
 
-  // When VITE_API_BASE_URL is provided, fallback/adapter delegates to real API endpoints
-  // Future implementation maps API HTTP calls here without touching any UI component!
+  console.info('[CrisisLink] 🟡 Mock mode — using in-memory demo data');
   return {
-    incidentService: mockIncidentService, // Defaulting safely until FastAPI endpoints connected
+    incidentService: mockIncidentService,
     reportService: mockReportService,
     resourceService: mockResourceService,
     systemService: mockSystemService,
     authService: mockAuthService,
-    isMockMode: false,
+    isMockMode: true,
+    isSupabaseMode: false,
   };
 }
 

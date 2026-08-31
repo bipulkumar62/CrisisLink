@@ -19,8 +19,8 @@ export class MockReportService implements IReportService {
       description: payload.description,
       location: {
         address: payload.address,
-        latitude: payload.latitude || 37.7749,
-        longitude: payload.longitude || -122.4194,
+        latitude: payload.latitude || 26.9124,
+        longitude: payload.longitude || 75.7873,
         neighborhood: 'Metro Area',
       },
       reporter: {
