@@ -28,7 +28,7 @@ interface TacticalMapProps {
 }
 
 // Map Updater Component to handle programmatic panning
-const MapUpdater: React.FC<{ selectedIncident: Incident | null }> = ({ selectedIncident }) => {
+const MapUpdater: React.FC<{ selectedIncident: Incident | null, incidents: Incident[] }> = ({ selectedIncident, incidents }) => {
   const map = useMap();
   React.useEffect(() => {
     if (selectedIncident) {
@@ -37,8 +37,16 @@ const MapUpdater: React.FC<{ selectedIncident: Incident | null }> = ({ selectedI
         15,
         { animate: true }
       );
+    } else {
+      const active = incidents.filter(i => i.status !== 'RESOLVED');
+      if (active.length > 0) {
+        const bounds = L.latLngBounds(active.map(i => [i.location.latitude, i.location.longitude]));
+        map.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
+      } else {
+        map.setView([APP_CONFIG.DEFAULT_MAP_CENTER.lat, APP_CONFIG.DEFAULT_MAP_CENTER.lng], APP_CONFIG.DEFAULT_ZOOM);
+      }
     }
-  }, [selectedIncident, map]);
+  }, [selectedIncident, map, incidents]);
   return null;
 };
 
@@ -162,7 +170,7 @@ export const TacticalMap: React.FC<TacticalMapProps> = ({
         className="w-full h-full z-0"
         zoomControl={false}
       >
-        <MapUpdater selectedIncident={selectedIncident} />
+        <MapUpdater selectedIncident={selectedIncident} incidents={incidents} />
         
         {/* OpenFreeMap Positron — quiet emergency-operations basemap (no API key required) */}
         <MapLibreBasemap styleUrl="https://tiles.openfreemap.org/styles/positron" />
