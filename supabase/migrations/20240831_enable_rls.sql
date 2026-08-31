@@ -15,16 +15,16 @@ ON public.incidents FOR INSERT
 TO authenticated 
 WITH CHECK (true);
 
-DROP POLICY IF EXISTS "Incidents can be updated by authenticated users" ON public.incidents;
-CREATE POLICY "Incidents can be updated by authenticated users" 
+DROP POLICY IF EXISTS "Incidents can be updated by anyone" ON public.incidents;
+CREATE POLICY "Incidents can be updated by anyone" 
 ON public.incidents FOR UPDATE 
-TO authenticated 
+TO anon, authenticated 
 USING (true);
 
-DROP POLICY IF EXISTS "Incidents can be deleted by authenticated users" ON public.incidents;
-CREATE POLICY "Incidents can be deleted by authenticated users" 
+DROP POLICY IF EXISTS "Incidents can be deleted by anyone" ON public.incidents;
+CREATE POLICY "Incidents can be deleted by anyone" 
 ON public.incidents FOR DELETE 
-TO authenticated 
+TO anon, authenticated 
 USING (true);
 
 
@@ -40,16 +40,16 @@ ON public.resources FOR INSERT
 TO authenticated 
 WITH CHECK (true);
 
-DROP POLICY IF EXISTS "Resources can be updated by authenticated users" ON public.resources;
-CREATE POLICY "Resources can be updated by authenticated users" 
+DROP POLICY IF EXISTS "Resources can be updated by anyone" ON public.resources;
+CREATE POLICY "Resources can be updated by anyone" 
 ON public.resources FOR UPDATE 
-TO authenticated 
+TO anon, authenticated 
 USING (true);
 
-DROP POLICY IF EXISTS "Resources can be deleted by authenticated users" ON public.resources;
-CREATE POLICY "Resources can be deleted by authenticated users" 
+DROP POLICY IF EXISTS "Resources can be deleted by anyone" ON public.resources;
+CREATE POLICY "Resources can be deleted by anyone" 
 ON public.resources FOR DELETE 
-TO authenticated 
+TO anon, authenticated 
 USING (true);
 
 
@@ -65,14 +65,14 @@ ON public.citizen_reports FOR INSERT
 TO anon, authenticated 
 WITH CHECK (true);
 
-DROP POLICY IF EXISTS "Reports can be updated by authenticated users" ON public.citizen_reports;
-CREATE POLICY "Reports can be updated by authenticated users" 
+DROP POLICY IF EXISTS "Reports can be updated by anyone" ON public.citizen_reports;
+CREATE POLICY "Reports can be updated by anyone" 
 ON public.citizen_reports FOR UPDATE 
-TO authenticated 
+TO anon, authenticated 
 USING (true);
 
-DROP POLICY IF EXISTS "Reports can be deleted by authenticated users" ON public.citizen_reports;
-CREATE POLICY "Reports can be deleted by authenticated users" 
+DROP POLICY IF EXISTS "Reports can be deleted by anyone" ON public.citizen_reports;
+CREATE POLICY "Reports can be deleted by anyone" 
 ON public.citizen_reports FOR DELETE 
-TO authenticated 
+TO anon, authenticated 
 USING (true);
