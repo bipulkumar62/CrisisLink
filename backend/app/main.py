@@ -55,7 +55,23 @@ def create_app() -> FastAPI:
     app.add_exception_handler(RequestValidationError, validation_exception_handler)
     app.add_exception_handler(Exception, unhandled_exception_handler)
 
-    # 3. Root Health Check Endpoint
+    # 3. Root & Health Check Endpoints
+    @app.get(
+        "/",
+        tags=["System Health"],
+        summary="Root API Info",
+        description="Returns API status and documentation links.",
+        status_code=status.HTTP_200_OK,
+    )
+    async def root_info() -> Dict[str, Any]:
+        return {
+            "status": "online",
+            "message": f"Welcome to {settings.APP_NAME} v{settings.APP_VERSION}",
+            "docs": "/docs",
+            "health": "/health",
+            "api_v1": settings.API_V1_STR,
+        }
+
     @app.get(
         "/health",
         tags=["System Health"],
