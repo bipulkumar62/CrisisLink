@@ -1,20 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   AlertTriangle,
   Radio,
   MapPin,
-  CheckCircle,
+  Clock,
+  Shield,
+  ArrowRight,
+  Zap,
+  Activity,
+  Layers,
   PhoneCall,
   Search,
-  Sparkles,
-  ArrowRight,
-  Droplets,
-  Flame,
-  Zap,
+  CheckCircle,
+  HelpCircle,
+  FileText,
+  Compass,
 } from 'lucide-react';
-import { RoutePath } from '@/src/config/constants';
+import { RoutePath, APP_CONFIG } from '@/src/config/constants';
 import { useEmergencyData } from '@/src/context/EmergencyDataContext';
 import { StatusBadge } from '@/src/components/common/StatusBadge';
+import { TacticalMap } from '@/src/components/map/TacticalMap';
 import { formatRelativeTime } from '@/src/utils/formatters';
 
 interface LandingPageProps {
@@ -23,256 +28,366 @@ interface LandingPageProps {
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onSelectIncident }) => {
-  const { incidents, stats } = useEmergencyData();
-  const [searchToken, setSearchToken] = React.useState('');
+  const { incidents, resources, telemetry, reports } = useEmergencyData();
+  const [tokenInput, setTokenInput] = useState('');
+  const [tokenLookupResult, setTokenLookupResult] = useState<{
+    found: boolean;
+    token?: string;
+    status?: string;
+    message?: string;
+  } | null>(null);
 
-  const publicIncidents = incidents.filter((i) => i.isPubliclyVisible && i.status !== 'RESOLVED');
+  const activeIncidents = incidents.filter((i) => i.isPubliclyVisible && i.status !== 'RESOLVED');
+  const criticalCount = activeIncidents.filter((i) => i.severity === 'CRITICAL').length;
 
-  const handleTrackSubmit = (e: React.FormEvent) => {
+  const handleTokenLookup = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchToken.trim()) {
-      onNavigate('citizen-confirmation');
+    if (!tokenInput.trim()) return;
+
+    const clean = tokenInput.trim().toUpperCase();
+    const match = reports.find((r) => r.trackingToken.toUpperCase() === clean);
+
+    if (match) {
+      setTokenLookupResult({
+        found: true,
+        token: match.trackingToken,
+        status: match.status,
+        message: `Report verified. Categorized as ${match.incidentCategory} in ${match.location.neighborhood || 'Jaipur'}. Assigned to live CAD triage.`,
+      });
+    } else {
+      setTokenLookupResult({
+        found: false,
+        message: `No active report found for token "${clean}". Please verify your reference code or submit a new eyewitness report.`,
+      });
     }
   };
 
   return (
     <div className="space-y-12 pb-16">
       {/* Hero Section */}
-      <section className="relative overflow-hidden rounded-xl bg-gradient-to-b from-[#0b1f33] to-[#081524] text-white p-6 sm:p-10 lg:p-12 shadow-md">
-        {/* Subtle grid pattern background */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f293715_1px,transparent_1px),linear-gradient(to_bottom,#1f293715_1px,transparent_1px)] bg-[size:24px_24px] opacity-40 pointer-events-none" />
-
-        <div className="relative z-10 max-w-3xl space-y-5">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-500/20 border border-red-500/30 rounded-full text-red-300 text-xs font-semibold uppercase tracking-wider">
-            <span className="w-2 h-2 rounded-full bg-red-400 animate-ping"></span>
-            Unified Citizen Crisis Ingestion Active
+      <section className="bg-white border border-[#D9E0E7] rounded-xl p-6 sm:p-10 shadow-xs">
+        <div className="max-w-4xl space-y-6">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#0B1F33] text-white text-[11px] font-mono-data font-bold uppercase tracking-wider">
+              <span className="w-2 h-2 rounded-full bg-[#16803A] animate-pulse"></span>
+              {APP_CONFIG.REGION_LABEL}
+            </span>
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-blue-50 text-[#2563EB] border border-blue-200 text-xs font-semibold">
+              <Activity className="w-3.5 h-3.5" />
+              {activeIncidents.length} Verified Municipal Incidents
+            </span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight font-heading leading-tight">
-            Emergency Intelligence & Response Coordination
-          </h1>
+          <div className="space-y-3">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#101828] font-heading tracking-tight leading-tight">
+              Rapid Emergency Intelligence & Response Coordination
+            </h1>
+            <p className="text-sm sm:text-base text-[#52606D] max-w-3xl leading-relaxed">
+              When disaster strikes, every second matters. CrisisLink fuses eyewitness reports, real-time sensor streams, and AI signal deduplication to deliver instant situational clarity for citizens and first responders across Jaipur.
+            </p>
+          </div>
 
-          <p className="text-sm sm:text-base text-slate-300 max-w-2xl leading-relaxed">
-            Report crises directly to regional first responder command in real time. CrisisLink
-            aggregates eyewitness evidence, auto-triages severity, and dispatches tactical rescue
-            teams rapidly.
-          </p>
-
-          {/* Direct CTA Buttons */}
-          <div className="pt-2 flex flex-wrap items-center gap-3">
+          {/* Action CTAs */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
             <button
               onClick={() => onNavigate('citizen-report')}
-              className="px-5 py-3 bg-[#0051d5] hover:bg-[#0041ab] text-white font-bold rounded-lg transition-all flex items-center gap-2 shadow-lg shadow-blue-900/40 text-sm active:scale-98"
+              className="px-6 py-3.5 bg-[#2563EB] hover:bg-[#1d4ed8] text-white font-bold text-sm rounded-lg flex items-center justify-center gap-2.5 shadow-sm active:scale-98 transition-colors cursor-pointer"
             >
               <AlertTriangle className="w-4 h-4" />
-              Report an Emergency Now
+              <span>Report an Emergency Now</span>
             </button>
 
             <button
               onClick={() => onNavigate('citizen-live')}
-              className="px-5 py-3 bg-white/10 hover:bg-white/15 text-white border border-white/20 font-semibold rounded-lg transition-all flex items-center gap-2 text-sm backdrop-blur-xs"
+              className="px-6 py-3.5 bg-white border border-[#D9E0E7] hover:bg-[#F7F8FA] text-[#101828] font-semibold text-sm rounded-lg flex items-center justify-center gap-2 transition-colors cursor-pointer"
             >
-              <MapPin className="w-4 h-4 text-blue-400" />
-              View Live Incidents Grid
+              <Compass className="w-4 h-4 text-[#2563EB]" />
+              <span>Explore Live Incident Grid</span>
+            </button>
+
+            <button
+              onClick={() => onNavigate('command-login')}
+              className="px-4 py-3.5 text-[#52606D] hover:text-[#101828] text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors sm:ml-auto"
+            >
+              <Radio className="w-3.5 h-3.5 text-[#2563EB]" />
+              <span>Operator CAD Login</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
-        </div>
 
-        {/* Live Broadcast Pill stats */}
-        <div className="mt-8 pt-6 border-t border-white/10 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-mono-data">
-          <div>
-            <span className="text-slate-400 block">Active Critical</span>
-            <span className="text-xl font-bold text-red-400">{stats.criticalCount} Incidents</span>
-          </div>
-          <div>
-            <span className="text-slate-400 block">High Priority</span>
-            <span className="text-xl font-bold text-amber-400">{stats.highCount} Incidents</span>
-          </div>
-          <div>
-            <span className="text-slate-400 block">Units Deployed</span>
-            <span className="text-xl font-bold text-blue-400">{stats.activeCount} Units</span>
-          </div>
-          <div>
-            <span className="text-slate-400 block">Response Time Avg</span>
-            <span className="text-xl font-bold text-emerald-400">4.8 min</span>
+          {/* Immediate Hotline Warning Strip */}
+          <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center justify-between gap-3 text-xs text-[#D92D20]">
+            <div className="flex items-center gap-2 font-medium">
+              <PhoneCall className="w-4 h-4 shrink-0" />
+              <span>Life-threatening emergency? Call national dispatch immediately.</span>
+            </div>
+            <a
+              href={`tel:${APP_CONFIG.HOTLINE_EMERGENCY}`}
+              className="font-bold underline uppercase tracking-wider font-mono-data shrink-0"
+            >
+              Dial 112
+            </a>
           </div>
         </div>
       </section>
 
-      {/* Emergency Report Tracking Banner */}
-      <section className="bg-white border border-slate-200 rounded-lg p-5 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-blue-50 text-[#0051d5] rounded-lg">
-            <Search className="w-5 h-5" />
-          </div>
-          <div>
-            <h3 className="text-sm font-bold text-slate-900 font-heading">
-              Have a Report Tracking Token?
-            </h3>
-            <p className="text-xs text-slate-500">
-              Check real-time dispatch progress, assigned responder units, and status updates.
-            </p>
-          </div>
-        </div>
-
-        <form onSubmit={handleTrackSubmit} className="flex items-center gap-2 w-full md:w-auto">
-          <input
-            type="text"
-            placeholder="e.g. CR-89241"
-            value={searchToken}
-            onChange={(e) => setSearchToken(e.target.value)}
-            className="px-3.5 py-2 text-xs border border-slate-300 rounded font-mono-data focus:outline-hidden focus:ring-2 focus:ring-blue-500 w-full md:w-48 uppercase"
-          />
-          <button
-            type="submit"
-            className="px-4 py-2 bg-slate-900 text-white rounded text-xs font-semibold hover:bg-slate-800 transition-colors whitespace-nowrap"
-          >
-            Track Status
-          </button>
-        </form>
-      </section>
-
-      {/* Live Public Alerts Grid */}
+      {/* Operational Jaipur Map & Live Grid Preview */}
       <section className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#D9E0E7] pb-3">
           <div>
-            <h2 className="text-xl font-bold text-slate-900 font-heading">
-              Active Public Emergency Advisories
+            <h2 className="text-xl sm:text-2xl font-bold text-[#101828] font-heading">
+              Live Jaipur Operational Grid
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Verified ongoing incidents verified by the Emergency Operations Center.
+            <p className="text-xs text-[#52606D] mt-0.5">
+              Verified spatial perimeters, evacuation cordons, and active response deployments.
             </p>
           </div>
           <button
             onClick={() => onNavigate('citizen-live')}
-            className="text-xs font-semibold text-[#0051d5] hover:text-[#0041ab] flex items-center gap-1"
+            className="inline-flex items-center gap-1 text-xs font-bold text-[#2563EB] hover:underline self-start sm:self-auto"
           >
-            All Live Incidents
+            <span>View Fullscreen Interactive Map</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {publicIncidents.slice(0, 3).map((inc) => (
-            <div
-              key={inc.id}
-              onClick={() => {
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+          {/* Map Preview */}
+          <div className="lg:col-span-2 rounded-xl overflow-hidden border border-[#D9E0E7] shadow-xs h-[420px]">
+            <TacticalMap
+              incidents={activeIncidents}
+              resources={resources}
+              selectedIncident={activeIncidents[0] || null}
+              onSelectIncident={(inc) => {
                 onSelectIncident(inc.code);
                 onNavigate('citizen-incident-detail');
               }}
-              className="bg-white border border-slate-200 rounded-lg p-4 hover:border-blue-400 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between"
-            >
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-mono-data text-xs font-bold text-slate-600">
-                    {inc.code}
-                  </span>
-                  <StatusBadge severity={inc.severity} />
-                </div>
-                <h3 className="text-base font-bold text-slate-900 font-heading">{inc.title}</h3>
-                <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
-                  {inc.publicSummary || inc.description}
-                </p>
-              </div>
+            />
+          </div>
 
-              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-mono-data">
-                <div className="flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                  <span className="truncate max-w-[140px]">{inc.location.sector}</span>
-                </div>
-                <span>{formatRelativeTime(inc.reportedAt)}</span>
+          {/* Real-time Alert Feed List */}
+          <div className="bg-white border border-[#D9E0E7] rounded-xl p-5 shadow-xs space-y-4">
+            <div className="flex items-center justify-between border-b border-[#D9E0E7] pb-3">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#D92D20] animate-ping"></span>
+                <h3 className="text-xs font-bold text-[#101828] font-heading uppercase tracking-wider">
+                  Active Priority Alerts
+                </h3>
               </div>
+              <span className="text-[11px] font-mono-data text-[#52606D]">
+                {activeIncidents.length} In Progress
+              </span>
             </div>
-          ))}
+
+            <div className="space-y-3 overflow-y-auto max-h-[320px] pr-1">
+              {activeIncidents.map((inc) => (
+                <div
+                  key={inc.id}
+                  onClick={() => {
+                    onSelectIncident(inc.code);
+                    onNavigate('citizen-incident-detail');
+                  }}
+                  className="p-3 bg-[#F7F8FA] border border-[#D9E0E7] rounded-lg hover:border-[#2563EB] hover:bg-blue-50/40 cursor-pointer transition-colors space-y-2"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono-data text-xs font-bold text-[#52606D]">
+                      {inc.code}
+                    </span>
+                    <StatusBadge severity={inc.severity} />
+                  </div>
+                  <h4 className="text-xs font-bold text-[#101828] line-clamp-1">
+                    {inc.title}
+                  </h4>
+                  <div className="flex items-center justify-between text-[11px] text-[#52606D] font-mono-data pt-1 border-t border-[#D9E0E7]">
+                    <div className="flex items-center gap-1 truncate max-w-[170px]">
+                      <MapPin className="w-3 h-3 shrink-0 text-[#2563EB]" />
+                      <span className="truncate">{inc.location.sector.split('-')[1] || inc.location.sector}</span>
+                    </div>
+                    <span>{formatRelativeTime(inc.reportedAt)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* How CrisisLink Works */}
-      <section className="bg-slate-50 border border-slate-200 rounded-xl p-6 sm:p-8 space-y-6">
-        <div className="text-center max-w-xl mx-auto space-y-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 bg-blue-100 text-[#0051d5] rounded-full text-xs font-semibold">
-            <Sparkles className="w-3.5 h-3.5" />
-            Zero Delay Dispatch
-          </div>
-          <h2 className="text-2xl font-bold text-slate-900 font-heading">
-            How CrisisLink Coordinates Response
+      {/* The 4-Step Operational Response Architecture Workflow */}
+      <section className="bg-white border border-[#D9E0E7] rounded-xl p-6 sm:p-8 shadow-xs space-y-6">
+        <div className="space-y-1">
+          <span className="text-[11px] font-bold font-mono-data text-[#2563EB] uppercase tracking-wider">
+            Operational Protocol
+          </span>
+          <h2 className="text-xl sm:text-2xl font-bold text-[#101828] font-heading">
+            How CrisisLink Coordinates Emergency Ingestion & Dispatch
           </h2>
-          <p className="text-xs text-slate-500">
-            Engineered for catastrophic conditions, multi-channel citizen intake, and automated
-            intelligence clustering.
+          <p className="text-xs sm:text-sm text-[#52606D]">
+            An end-to-end multi-signal coordination pipeline built for catastrophic communication scenarios.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white p-5 rounded-lg border border-slate-200 space-y-3">
-            <div className="w-9 h-9 bg-blue-50 text-[#0051d5] rounded flex items-center justify-center font-bold font-mono-data text-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="p-4 bg-[#F7F8FA] border border-[#D9E0E7] rounded-lg space-y-2.5">
+            <div className="w-8 h-8 rounded bg-[#0B1F33] text-white flex items-center justify-center text-xs font-bold font-mono-data">
               01
             </div>
-            <h3 className="font-bold text-slate-900 text-sm font-heading">
-              Eyewitness Ingestion
-            </h3>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Citizens submit geo-tagged incident reports with photo and voice evidence without
-              creating accounts.
+            <h3 className="text-sm font-bold text-[#101828]">Citizen Ingestion</h3>
+            <p className="text-xs text-[#52606D] leading-relaxed">
+              Eyewitnesses submit geo-coordinates, photos, voice memos, or text summaries instantly without account barriers or app installation.
             </p>
           </div>
 
-          <div className="bg-white p-5 rounded-lg border border-slate-200 space-y-3">
-            <div className="w-9 h-9 bg-purple-50 text-purple-600 rounded flex items-center justify-center font-bold font-mono-data text-sm">
+          <div className="p-4 bg-[#F7F8FA] border border-[#D9E0E7] rounded-lg space-y-2.5">
+            <div className="w-8 h-8 rounded bg-[#2563EB] text-white flex items-center justify-center text-xs font-bold font-mono-data">
               02
             </div>
-            <h3 className="font-bold text-slate-900 text-sm font-heading">
-              AI Multi-Signal Fusion
-            </h3>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Dozens of incoming reports are deduplicated, cross-referenced with IoT sensors, and
-              scored for life-threat priority.
+            <h3 className="text-sm font-bold text-[#101828]">AI Signal Fusion</h3>
+            <p className="text-xs text-[#52606D] leading-relaxed">
+              Deduplication algorithms cluster redundant calls, filter hallucinations, analyze damage severity from photos, and cross-reference IoT sensors.
             </p>
           </div>
 
-          <div className="bg-white p-5 rounded-lg border border-slate-200 space-y-3">
-            <div className="w-9 h-9 bg-emerald-50 text-emerald-600 rounded flex items-center justify-center font-bold font-mono-data text-sm">
+          <div className="p-4 bg-[#F7F8FA] border border-[#D9E0E7] rounded-lg space-y-2.5">
+            <div className="w-8 h-8 rounded bg-[#0B1F33] text-white flex items-center justify-center text-xs font-bold font-mono-data">
               03
             </div>
-            <h3 className="font-bold text-slate-900 text-sm font-heading">
-              Tactical Fleet Dispatch
-            </h3>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Command Center operators allocate nearest specialized rescue teams and broadcast
-              real-time evacuation safe zones.
+            <h3 className="text-sm font-bold text-[#101828]">Tactical CAD Dispatch</h3>
+            <p className="text-xs text-[#52606D] leading-relaxed">
+              Commanders receive structured dossiers with triage scores and deploy optimal rescue units, foam tenders, or medical trauma teams.
+            </p>
+          </div>
+
+          <div className="p-4 bg-[#F7F8FA] border border-[#D9E0E7] rounded-lg space-y-2.5">
+            <div className="w-8 h-8 rounded bg-[#16803A] text-white flex items-center justify-center text-xs font-bold font-mono-data">
+              04
+            </div>
+            <h3 className="text-sm font-bold text-[#101828]">Safety Broadcast</h3>
+            <p className="text-xs text-[#52606D] leading-relaxed">
+              Real-time evacuation cordons, road blockage warnings, and safe routes are broadcast to the public map, keeping roads clear for ambulances.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Emergency Hotline Direct Access */}
-      <section className="bg-red-50 border border-red-200 rounded-lg p-5 flex flex-col sm:flex-row items-center justify-between gap-4 text-red-950">
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-red-600 text-white rounded-lg">
-            <PhoneCall className="w-6 h-6 animate-pulse" />
+      {/* Public Service Problem & System Credibility */}
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Left: The Real-world Problem */}
+        <div className="bg-white border border-[#D9E0E7] rounded-xl p-6 shadow-xs space-y-4">
+          <div className="flex items-center gap-2 text-[#D92D20]">
+            <AlertTriangle className="w-5 h-5" />
+            <h3 className="text-base font-bold font-heading text-[#101828]">
+              The Crisis Communications Breakdown
+            </h3>
           </div>
-          <div>
-            <h3 className="text-sm font-bold font-heading">Official Emergency Contact Hub</h3>
-            <p className="text-xs text-red-800">
-              For immediate active danger to human life, contact local authorities directly:
-            </p>
-          </div>
+          <p className="text-xs sm:text-sm text-[#52606D] leading-relaxed">
+            During extreme weather events, building collapses, and industrial hazards, traditional 911 / 112 telephone switches become choked with duplicate calls within minutes.
+          </p>
+          <ul className="space-y-2.5 text-xs text-[#101828]">
+            <li className="flex items-start gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#D92D20] mt-1.5 shrink-0"></span>
+              <span><strong>Overloaded Switchboards:</strong> Dispatchers spend critical minutes answering the same event from hundreds of callers.</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#D92D20] mt-1.5 shrink-0"></span>
+              <span><strong>Social Media Misinformation:</strong> Unverified rumors cause panic and route civilian cars into blocked evacuation corridors.</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#D92D20] mt-1.5 shrink-0"></span>
+              <span><strong>Lack of Ground Truth:</strong> First responders deploy without knowing water depth, structural integrity, or toxic gas plumes.</span>
+            </li>
+          </ul>
         </div>
 
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <a
-            href="tel:911"
-            className="flex-1 sm:flex-none px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded transition-colors text-center shadow-xs"
-          >
-            Call 911 Direct
-          </a>
-          <a
-            href="tel:311"
-            className="flex-1 sm:flex-none px-4 py-2.5 bg-white border border-red-300 text-red-900 font-semibold text-xs rounded hover:bg-red-100 transition-colors text-center"
-          >
-            Call 311 Non-Emergency
-          </a>
+        {/* Right: CrisisLink Solution Credibility */}
+        <div className="bg-white border border-[#D9E0E7] rounded-xl p-6 shadow-xs space-y-4">
+          <div className="flex items-center gap-2 text-[#2563EB]">
+            <Shield className="w-5 h-5" />
+            <h3 className="text-base font-bold font-heading text-[#101828]">
+              System Integrity & Public Safety Standards
+            </h3>
+          </div>
+          <p className="text-xs sm:text-sm text-[#52606D] leading-relaxed">
+            CrisisLink operates as an auxiliary emergency intelligence mesh adhering to strict municipal security and verification protocols:
+          </p>
+          <ul className="space-y-2.5 text-xs text-[#101828]">
+            <li className="flex items-start gap-2">
+              <CheckCircle className="w-4 h-4 text-[#16803A] shrink-0 mt-0.5" />
+              <span><strong>Zero Friction Ingestion:</strong> Citizens do not need an account or app download to report emergencies.</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <CheckCircle className="w-4 h-4 text-[#16803A] shrink-0 mt-0.5" />
+              <span><strong>Strict Reporter Privacy:</strong> Citizen phone numbers and identity data are encrypted and never shown publicly.</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <CheckCircle className="w-4 h-4 text-[#16803A] shrink-0 mt-0.5" />
+              <span><strong>Verified Cordons:</strong> Only officially confirmed perimeters and advisories are rendered on the public map.</span>
+            </li>
+          </ul>
         </div>
+      </section>
+
+      {/* Tracking Token Lookup Widget */}
+      <section className="bg-[#0B1F33] text-white rounded-xl p-6 sm:p-8 shadow-sm space-y-5">
+        <div className="max-w-2xl space-y-2">
+          <span className="text-[11px] font-mono-data font-bold text-blue-400 uppercase tracking-wider">
+            Public Inquiry Portal
+          </span>
+          <h2 className="text-xl sm:text-2xl font-bold font-heading text-white">
+            Track Existing Emergency Report
+          </h2>
+          <p className="text-xs text-slate-300">
+            Enter the tracking token provided upon report submission (e.g., <code className="font-mono-data text-blue-300">CR-JP-89241</code>) to inspect live dispatch status.
+          </p>
+        </div>
+
+        <form onSubmit={handleTokenLookup} className="flex flex-col sm:flex-row items-stretch gap-2.5 max-w-xl">
+          <div className="relative flex-1">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="e.g. CR-JP-89241"
+              value={tokenInput}
+              onChange={(e) => setTokenInput(e.target.value)}
+              className="w-full pl-9 pr-3 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-xs font-mono-data text-white placeholder-slate-500 focus:outline-hidden focus:border-[#2563EB]"
+            />
+          </div>
+          <button
+            type="submit"
+            className="px-5 py-2.5 bg-[#2563EB] hover:bg-[#1d4ed8] text-white font-bold text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+          >
+            <Search className="w-3.5 h-3.5" />
+            <span>Verify Token</span>
+          </button>
+        </form>
+
+        {tokenLookupResult && (
+          <div
+            className={`p-4 rounded-lg border text-xs max-w-xl space-y-2 ${
+              tokenLookupResult.found
+                ? 'bg-blue-950/60 border-blue-800 text-blue-100'
+                : 'bg-red-950/60 border-red-800 text-red-100'
+            }`}
+          >
+            <div className="flex items-center justify-between font-bold">
+              <span className="font-mono-data">{tokenLookupResult.token || 'Query Result'}</span>
+              {tokenLookupResult.found && (
+                <span className="px-2 py-0.5 bg-[#16803A] text-white rounded font-mono-data text-[10px]">
+                  STATUS: {tokenLookupResult.status}
+                </span>
+              )}
+            </div>
+            <p className="leading-relaxed">{tokenLookupResult.message}</p>
+            {tokenLookupResult.found && (
+              <button
+                onClick={() => onNavigate('citizen-confirmation')}
+                className="inline-flex items-center gap-1 text-xs font-bold text-blue-300 hover:underline pt-1"
+              >
+                <span>Open Full Tracking Dossier</span>
+                <ArrowRight className="w-3 h-3" />
+              </button>
+            )}
+          </div>
+        )}
       </section>
     </div>
   );

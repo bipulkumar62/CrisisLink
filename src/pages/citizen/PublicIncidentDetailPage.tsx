@@ -10,8 +10,10 @@ import {
   PhoneCall,
   CheckCircle,
   FileText,
+  Activity,
+  Layers,
 } from 'lucide-react';
-import { RoutePath } from '@/src/config/constants';
+import { RoutePath, APP_CONFIG } from '@/src/config/constants';
 import { useEmergencyData } from '@/src/context/EmergencyDataContext';
 import { StatusBadge } from '@/src/components/common/StatusBadge';
 import { formatRelativeTime } from '@/src/utils/formatters';
@@ -25,157 +27,189 @@ export const PublicIncidentDetailPage: React.FC<PublicIncidentDetailPageProps> =
   incidentCode,
   onNavigate,
 }) => {
-  const { incidents } = useEmergencyData();
+  const { incidents, resources } = useEmergencyData();
   const incident =
     incidents.find((i) => i.code.toLowerCase() === incidentCode.toLowerCase()) || incidents[0];
 
   if (!incident) {
     return (
-      <div className="text-center py-12">
-        <p className="text-sm text-slate-500">Incident not found.</p>
+      <div className="text-center py-16 bg-white border border-[#D9E0E7] rounded-xl p-8 space-y-4">
+        <p className="text-sm text-[#52606D]">Incident record not found in active grid.</p>
         <button
           onClick={() => onNavigate('citizen-live')}
-          className="mt-3 px-4 py-2 bg-blue-600 text-white rounded text-xs font-semibold"
+          className="px-4 py-2 bg-[#2563EB] text-white rounded-lg text-xs font-bold"
         >
-          Return to Live Map
+          Return to Live Incidents Grid
         </button>
       </div>
     );
   }
 
+  // Assigned resources details (public unit types only, safe from operational compromise)
+  const assignedUnits = resources.filter((r) => r.assignedIncidentId === incident.id);
+
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-16">
-      {/* Back link */}
+    <div className="max-w-4xl mx-auto space-y-6 pb-20 px-2 sm:px-0">
+      {/* Back button */}
       <button
         onClick={() => onNavigate('citizen-live')}
-        className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors"
+        className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#52606D] hover:text-[#101828] transition-colors cursor-pointer"
       >
         <ArrowLeft className="w-4 h-4" />
-        Back to Live Incidents Grid
+        <span>Back to Live Jaipur Incidents Grid</span>
       </button>
 
-      {/* Hero Header */}
-      <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-xs space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-4">
+      {/* Incident Header Dossier Card */}
+      <div className="bg-white border border-[#D9E0E7] rounded-xl p-6 sm:p-8 shadow-xs space-y-5">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#D9E0E7] pb-4">
           <div className="flex items-center gap-2 font-mono-data">
-            <span className="text-sm font-bold text-slate-600">{incident.code}</span>
+            <span className="text-sm font-bold text-[#101828]">{incident.code}</span>
             <StatusBadge severity={incident.severity} />
             <StatusBadge status={incident.status} />
           </div>
-          <span className="text-xs text-slate-500 font-mono-data">
-            First Logged: {formatRelativeTime(incident.reportedAt)}
+          <span className="text-xs text-[#52606D] font-mono-data">
+            Logged: {formatRelativeTime(incident.reportedAt)} • Jaipur CAD Mesh
           </span>
         </div>
 
         <div className="space-y-2">
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 font-heading">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#101828] font-heading">
             {incident.title}
           </h1>
-          <div className="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
-            <MapPin className="w-4 h-4 text-red-500" />
+          <div className="flex items-center gap-2 text-xs text-[#52606D] font-medium">
+            <MapPin className="w-4 h-4 text-[#D92D20] shrink-0" />
             <span>{incident.location.address} ({incident.location.sector})</span>
           </div>
         </div>
 
-        {/* Public Summary banner */}
-        <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
-          <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-            Verified Situation Assessment
-          </h4>
-          <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+        {/* Verified Situation Assessment Notice */}
+        <div className="p-4 bg-[#F7F8FA] border border-[#D9E0E7] rounded-lg space-y-1.5">
+          <div className="flex items-center gap-2 text-[#101828] font-bold text-xs uppercase tracking-wider">
+            <Shield className="w-3.5 h-3.5 text-[#2563EB]" />
+            <span>Verified Situation Assessment</span>
+          </div>
+          <p className="text-xs sm:text-sm text-[#52606D] leading-relaxed">
             {incident.publicSummary || incident.description}
           </p>
         </div>
       </div>
 
-      {/* Safety & Evacuation Directives */}
+      {/* Evacuation & Safety Signals */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2 space-y-4">
-          {/* Evacuation Alert Card */}
+        <div className="md:col-span-2 space-y-5">
+          {/* Active Safety Perimeter Warning */}
           {incident.evacuationRadiusMeters ? (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-5 text-red-950 space-y-2">
-              <div className="flex items-center gap-2 font-bold text-red-800 text-sm">
-                <AlertTriangle className="w-5 h-5 text-red-600" />
-                Active Safety Cordon Established ({incident.evacuationRadiusMeters}m)
+            <div className="bg-red-50 border border-red-200 rounded-xl p-5 text-[#D92D20] space-y-2">
+              <div className="flex items-center gap-2 font-bold text-sm">
+                <AlertTriangle className="w-5 h-5 shrink-0" />
+                <span>Active Safety Perimeter Cordon ({incident.evacuationRadiusMeters} meters)</span>
               </div>
-              <p className="text-xs text-red-900 leading-relaxed">
-                Emergency services have secured an exclusion perimeter around the incident zone.
-                Please yield right-of-way to flashing emergency apparatus and refrain from driving
-                towards the sector.
+              <p className="text-xs text-slate-800 leading-relaxed">
+                Emergency services have established an exclusion perimeter around the incident zone. Please yield right-of-way to flashing emergency apparatus and keep access roads open.
               </p>
             </div>
           ) : null}
 
-          {/* Timeline / Incident Signals */}
-          <div className="bg-white border border-slate-200 rounded-lg p-5 shadow-xs space-y-4">
-            <h3 className="text-sm font-bold text-slate-900 font-heading uppercase tracking-wider">
-              Emergency Operations Timeline & Signals
-            </h3>
+          {/* Operational Timeline & Verified Signals */}
+          <div className="bg-white border border-[#D9E0E7] rounded-xl p-5 sm:p-6 shadow-xs space-y-4">
+            <div className="flex items-center justify-between border-b border-[#D9E0E7] pb-3">
+              <h3 className="text-sm font-bold text-[#101828] font-heading uppercase tracking-wider">
+                Emergency Timeline & Ground Signals
+              </h3>
+              <span className="text-[11px] font-mono-data text-[#52606D]">
+                {incident.signals.length} Verified Broadcasts
+              </span>
+            </div>
 
             <div className="space-y-3">
               {incident.signals.map((sig) => (
                 <div
                   key={sig.id}
-                  className="p-3 bg-slate-50 rounded border border-slate-200 space-y-1"
+                  className="p-3.5 bg-[#F7F8FA] rounded-lg border border-[#D9E0E7] space-y-1.5"
                 >
-                  <div className="flex items-center justify-between text-[11px] font-mono-data text-slate-500">
-                    <span className="font-bold text-blue-700">{sig.type.replace('_', ' ')}</span>
-                    <span>{sig.timestamp}</span>
+                  <div className="flex items-center justify-between text-[11px] font-mono-data">
+                    <span className="font-bold text-[#2563EB]">{sig.type.replace('_', ' ')}</span>
+                    <span className="text-[#52606D]">{sig.timestamp}</span>
                   </div>
-                  <p className="text-xs text-slate-800 leading-relaxed">{sig.message}</p>
-                  <span className="text-[10px] text-slate-400 block">{sig.source}</span>
+                  <p className="text-xs text-[#101828] leading-relaxed">{sig.message}</p>
+                  <span className="text-[10px] text-[#52606D] font-mono-data block">Source: {sig.source}</span>
                 </div>
               ))}
             </div>
           </div>
+
+          {/* Assigned First Responder Summary */}
+          {assignedUnits.length > 0 && (
+            <div className="bg-white border border-[#D9E0E7] rounded-xl p-5 shadow-xs space-y-3">
+              <h3 className="text-xs font-bold text-[#101828] uppercase tracking-wider">
+                Deployed Public Safety Units on Scene
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {assignedUnits.map((u) => (
+                  <div
+                    key={u.id}
+                    className="p-2.5 bg-[#F7F8FA] border border-[#D9E0E7] rounded-lg flex items-center justify-between text-xs"
+                  >
+                    <div>
+                      <span className="font-bold text-[#101828] block">{u.name}</span>
+                      <span className="text-[11px] text-[#52606D] font-mono-data">{u.station}</span>
+                    </div>
+                    <span className="px-2 py-0.5 bg-emerald-50 text-[#16803A] border border-emerald-200 rounded text-[10px] font-mono-data font-bold">
+                      {u.status.replace('_', ' ')}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Right Sidebar: Key Numbers & Actions */}
+        {/* Right Sidebar: Citizen Safety Actions & Hotline */}
         <div className="space-y-4">
-          <div className="bg-white border border-slate-200 rounded-lg p-5 shadow-xs space-y-4 text-xs">
-            <h3 className="font-bold text-slate-900 font-heading uppercase tracking-wider">
-              Citizen Advisory Actions
+          <div className="bg-white border border-[#D9E0E7] rounded-xl p-5 shadow-xs space-y-4 text-xs">
+            <h3 className="font-bold text-[#101828] uppercase tracking-wider">
+              Citizen Advisory Guidelines
             </h3>
 
-            <ul className="space-y-2 text-slate-600">
+            <ul className="space-y-2.5 text-[#52606D]">
               <li className="flex items-start gap-2">
-                <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                <span>Keep telephone lines free for critical 911 calls.</span>
+                <CheckCircle className="w-4 h-4 text-[#16803A] shrink-0 mt-0.5" />
+                <span>Keep telephone lines free for life-threatening emergencies.</span>
               </li>
               <li className="flex items-start gap-2">
-                <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                <span>Monitor local emergency radio and CrisisLink broadcast feed.</span>
+                <CheckCircle className="w-4 h-4 text-[#16803A] shrink-0 mt-0.5" />
+                <span>Do not attempt to cross flooded intersections or downed wires.</span>
               </li>
               <li className="flex items-start gap-2">
-                <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                <span>If trapped, signal first responders with light or high-visibility cloth.</span>
+                <CheckCircle className="w-4 h-4 text-[#16803A] shrink-0 mt-0.5" />
+                <span>Monitor this live CrisisLink advisory feed for perimeter updates.</span>
               </li>
             </ul>
 
-            <div className="pt-2 border-t border-slate-100 space-y-2">
+            <div className="pt-2 border-t border-[#D9E0E7] space-y-2">
               <button
                 onClick={() => onNavigate('citizen-report')}
-                className="w-full py-2.5 bg-[#0051d5] hover:bg-[#0041ab] text-white font-semibold rounded text-xs transition-colors flex items-center justify-center gap-1.5"
+                className="w-full py-2.5 bg-[#2563EB] hover:bg-[#1d4ed8] text-white font-bold rounded-lg text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
               >
                 <AlertTriangle className="w-3.5 h-3.5" />
-                Provide Eyewitness Update
+                <span>Provide Eyewitness Update</span>
               </button>
             </div>
           </div>
 
-          <div className="bg-slate-900 text-white rounded-lg p-5 space-y-3 text-xs">
+          <div className="bg-[#0B1F33] text-white rounded-xl p-5 space-y-3 text-xs">
             <div className="flex items-center gap-2 text-red-400 font-bold uppercase">
               <PhoneCall className="w-4 h-4" />
-              Direct CAD Hotline
+              <span>Direct Jaipur CAD Helpline</span>
             </div>
-            <p className="text-slate-300">
-              For trapped victims or medical emergencies in this sector, contact dispatchers directly:
+            <p className="text-slate-300 leading-relaxed">
+              If you are trapped or need urgent medical rescue in this sector:
             </p>
             <a
-              href="tel:911"
-              className="block w-full py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-center rounded transition-colors"
+              href={`tel:${APP_CONFIG.HOTLINE_EMERGENCY}`}
+              className="block w-full py-2.5 bg-[#D92D20] hover:bg-red-700 text-white font-bold text-center rounded-lg transition-colors font-mono-data"
             >
-              Dial 911 Direct
+              Dial 112 (National Emergency)
             </a>
           </div>
         </div>

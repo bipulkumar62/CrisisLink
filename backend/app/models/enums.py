@@ -1,0 +1,61 @@
+from enum import Enum
+
+
+class IncidentCategory(str, Enum):
+    FLOOD = "FLOOD"
+    FIRE = "FIRE"
+    TRAFFIC = "TRAFFIC"
+    STRUCTURE_COLLAPSE = "STRUCTURE_COLLAPSE"
+    HAZMAT = "HAZMAT"
+    MEDICAL = "MEDICAL"
+    POWER_OUTAGE = "POWER_OUTAGE"
+    OTHER = "OTHER"
+
+
+class IncidentSeverity(str, Enum):
+    CRITICAL = "CRITICAL"
+    HIGH = "HIGH"
+    MEDIUM = "MEDIUM"
+    LOW = "LOW"
+
+
+class IncidentStatus(str, Enum):
+    REPORTED = "REPORTED"
+    TRIAGED = "TRIAGED"
+    VERIFIED = "VERIFIED"
+    DISPATCHED = "DISPATCHED"
+    CONTAINED = "CONTAINED"
+    RESOLVED = "RESOLVED"
+    REJECTED = "REJECTED"
+
+
+class ReportStatus(str, Enum):
+    PENDING_TRIAGE = "PENDING_TRIAGE"
+    CLUSTERED = "CLUSTERED"
+    VERIFIED = "VERIFIED"
+    INCONCLUSIVE = "INCONCLUSIVE"
+    REJECTED = "REJECTED"
+
+
+class ResourceType(str, Enum):
+    AMBULANCE = "AMBULANCE"
+    RESCUE_BOAT = "RESCUE_BOAT"
+    FIRE_TRUCK = "FIRE_TRUCK"
+    SHELTER = "SHELTER"
+    DRONE_SURVEILLANCE = "DRONE_SURVEILLANCE"
+    EVACUATION_BUS = "EVACUATION_BUS"
+
+
+class ResourceStatus(str, Enum):
+    AVAILABLE = "AVAILABLE"
+    ASSIGNED = "ASSIGNED"
+    BUSY = "BUSY"
+    MAINTENANCE = "MAINTENANCE"
+    OFFLINE = "OFFLINE"
+
+
+class UserRole(str, Enum):
+    DISPATCHER = "DISPATCHER"
+    INCIDENT_COMMANDER = "INCIDENT_COMMANDER"
+    FIRST_RESPONDER = "FIRST_RESPONDER"
+    SUPER_ADMIN = "SUPER_ADMIN"

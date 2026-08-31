@@ -1,0 +1,19 @@
+[
+  "backend/tests/test_api.py::test_admin_assign_resources_to_incident",
+  "backend/tests/test_api.py::test_admin_create_and_update_resource",
+  "backend/tests/test_api.py::test_admin_dashboard",
+  "backend/tests/test_api.py::test_admin_get_incident_detail",
+  "backend/tests/test_api.py::test_admin_list_incidents",
+  "backend/tests/test_api.py::test_admin_list_reports",
+  "backend/tests/test_api.py::test_admin_list_resources",
+  "backend/tests/test_api.py::test_admin_system_status",
+  "backend/tests/test_api.py::test_admin_update_incident_status",
+  "backend/tests/test_api.py::test_auth_login",
+  "backend/tests/test_api.py::test_auth_login_invalid_password",
+  "backend/tests/test_api.py::test_health_check",
+  "backend/tests/test_api.py::test_public_get_incident_by_id",
+  "backend/tests/test_api.py::test_public_get_incident_not_found",
+  "backend/tests/test_api.py::test_public_list_incidents",
+  "backend/tests/test_api.py::test_public_submit_report",
+  "backend/tests/test_api.py::test_public_submit_report_validation_failure"
+]

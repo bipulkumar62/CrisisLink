@@ -10,6 +10,8 @@ import {
   Shield,
   Layers,
   HeartPulse,
+  Radio,
+  Eye,
 } from 'lucide-react';
 import { Incident } from '@/src/types/incident';
 import { ResourceUnit } from '@/src/types/resource';
@@ -43,37 +45,40 @@ export const TacticalMap: React.FC<TacticalMapProps> = ({
         return <Flame className="w-3.5 h-3.5 text-white" />;
       case 'POWER_OUTAGE':
         return <Zap className="w-3.5 h-3.5 text-white" />;
+      case 'STRUCTURE_COLLAPSE':
+        return <AlertTriangle className="w-3.5 h-3.5 text-white" />;
       default:
         return <AlertTriangle className="w-3.5 h-3.5 text-white" />;
     }
   };
 
-  // Normalized map coordinates for visual simulation
-  // Map bounds: Lat ~ 37.74 to 37.80, Lng ~ -122.46 to -122.38
+  // Normalized map coordinates for Jaipur Municipality
+  // Lat: 26.76 (Sitapura South) to 26.96 (Amer / Walled City North)
+  // Lng: 75.72 (Vaishali West) to 75.86 (Ghat Gate / Ramganj East)
   const toMapCoords = (lat: number, lng: number) => {
-    const minLat = 37.74;
-    const maxLat = 37.80;
-    const minLng = -122.46;
-    const maxLng = -122.38;
+    const minLat = 26.76;
+    const maxLat = 26.96;
+    const minLng = 75.72;
+    const maxLng = 75.86;
 
     const y = 100 - ((lat - minLat) / (maxLat - minLat)) * 100;
     const x = ((lng - minLng) / (maxLng - minLng)) * 100;
 
     return {
-      top: `${Math.max(10, Math.min(90, y))}%`,
-      left: `${Math.max(10, Math.min(90, x))}%`,
+      top: `${Math.max(8, Math.min(92, y))}%`,
+      left: `${Math.max(8, Math.min(92, x))}%`,
     };
   };
 
   return (
     <div
       className={`relative w-full ${
-        fullHeight ? 'h-full min-h-[420px]' : 'h-[360px]'
-      } bg-[#e9e5df] overflow-hidden select-none border-b lg:border-b-0 border-[#c4c6cd]/60`}
+        fullHeight ? 'h-full min-h-[440px]' : 'h-[360px]'
+      } bg-[#e8ecf0] overflow-hidden select-none border border-[#D9E0E7]`}
     >
-      {/* Background Stylized Vector Urban Grid Canvas */}
+      {/* Background Vector Map Canvas for Jaipur City Grid */}
       <div
-        className="absolute inset-0 transition-transform duration-300 ease-out"
+        className="absolute inset-0 transition-transform duration-200 ease-out"
         style={{
           transform: `scale(${zoomLevel})`,
           transformOrigin: selectedIncident
@@ -83,132 +88,160 @@ export const TacticalMap: React.FC<TacticalMapProps> = ({
             : 'center center',
         }}
       >
-        {/* Stylized Urban Map Elements */}
         <svg
-          className="w-full h-full object-cover opacity-85"
+          className="w-full h-full object-cover opacity-90"
           viewBox="0 0 1000 700"
           preserveAspectRatio="xMidYMid slice"
           xmlns="http://www.w3.org/2000/svg"
         >
           <defs>
-            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#d5d0c7" strokeWidth="1" />
+            <pattern id="jaipur-grid" width="30" height="30" patternUnits="userSpaceOnUse">
+              <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#d5dde4" strokeWidth="0.8" />
             </pattern>
-            <pattern id="blocks" width="120" height="120" patternUnits="userSpaceOnUse">
-              <rect x="5" y="5" width="50" height="50" fill="#dfdad0" rx="3" />
-              <rect x="65" y="5" width="50" height="50" fill="#e2ddd4" rx="3" />
-              <rect x="5" y="65" width="50" height="50" fill="#e4dfd6" rx="3" />
-              <rect x="65" y="65" width="50" height="50" fill="#ddd7cd" rx="3" />
+            <pattern id="urban-blocks" width="100" height="100" patternUnits="userSpaceOnUse">
+              <rect x="4" y="4" width="42" height="42" fill="#dce3ea" rx="2" />
+              <rect x="52" y="4" width="42" height="42" fill="#e2e8ef" rx="2" />
+              <rect x="4" y="52" width="42" height="42" fill="#e0e7ee" rx="2" />
+              <rect x="52" y="52" width="42" height="42" fill="#d9e1e8" rx="2" />
             </pattern>
           </defs>
 
           {/* Base terrain */}
-          <rect width="1000" height="700" fill="#eae6e0" />
-          <rect width="1000" height="700" fill="url(#blocks)" />
-          <rect width="1000" height="700" fill="url(#grid)" opacity="0.6" />
+          <rect width="1000" height="700" fill="#eef2f6" />
+          <rect width="1000" height="700" fill="url(#urban-blocks)" />
+          <rect width="1000" height="700" fill="url(#jaipur-grid)" opacity="0.7" />
 
-          {/* River / Bay channel */}
+          {/* Jal Mahal & Aravalli Ridges (North) */}
           <path
-            d="M -50 480 Q 250 420, 500 520 T 1050 460 L 1050 750 L -50 750 Z"
-            fill="#cadce8"
-            opacity="0.9"
+            d="M 680 0 Q 720 100, 840 140 T 1000 120 L 1000 0 Z"
+            fill="#b8d4e4"
+            opacity="0.85"
           />
           <path
-            d="M 320 -20 Q 340 200, 480 340 T 520 720"
-            fill="none"
-            stroke="#cadce8"
-            strokeWidth="36"
-            opacity="0.8"
+            d="M 0 0 Q 180 80, 240 160 L 0 180 Z"
+            fill="#cdd8c5"
+            opacity="0.6"
           />
 
-          {/* Major Arterial Highways & Bridges */}
+          {/* Walled City Pink City Grid (North Center) */}
+          <rect x="580" y="100" width="220" height="130" fill="#edd6d2" stroke="#d4a39b" strokeWidth="2" rx="4" />
+          <line x1="690" y1="100" x2="690" y2="230" stroke="#fdfbf7" strokeWidth="6" />
+          <line x1="580" y1="165" x2="800" y2="165" stroke="#fdfbf7" strokeWidth="6" />
+
+          {/* Major Arterial Corridors in Jaipur */}
+          {/* JLN Marg Corridor (North-South Axis) */}
           <path
-            d="M -50 220 L 1050 280"
+            d="M 640 160 L 610 380 L 590 560"
             fill="none"
-            stroke="#fefefe"
+            stroke="#ffffff"
             strokeWidth="14"
             strokeLinecap="round"
           />
           <path
-            d="M -50 220 L 1050 280"
+            d="M 640 160 L 610 380 L 590 560"
             fill="none"
-            stroke="#f09a3e"
-            strokeWidth="2"
-            strokeDasharray="8 6"
+            stroke="#2563eb"
+            strokeWidth="2.5"
+            strokeDasharray="6 4"
+            opacity="0.8"
           />
 
+          {/* MI Road & Ajmer Road (East-West Axis) */}
           <path
-            d="M 680 -50 L 580 750"
+            d="M 120 280 L 480 240 L 820 220"
             fill="none"
-            stroke="#fefefe"
+            stroke="#ffffff"
+            strokeWidth="13"
+            strokeLinecap="round"
+          />
+          <path
+            d="M 120 280 L 480 240 L 820 220"
+            fill="none"
+            stroke="#f59e0b"
+            strokeWidth="2"
+            strokeDasharray="6 4"
+          />
+
+          {/* Tonk Road & Gopalpura Bypass */}
+          <path
+            d="M 520 220 L 560 460 L 680 700"
+            fill="none"
+            stroke="#ffffff"
             strokeWidth="12"
             strokeLinecap="round"
           />
           <path
-            d="M 220 -50 L 380 750"
+            d="M 220 480 L 820 440"
             fill="none"
-            stroke="#fefefe"
+            stroke="#ffffff"
             strokeWidth="10"
             strokeLinecap="round"
           />
 
           {/* Secondary streets */}
-          <line x1="0" y1="120" x2="1000" y2="120" stroke="#fefefe" strokeWidth="6" />
-          <line x1="0" y1="360" x2="1000" y2="360" stroke="#fefefe" strokeWidth="7" />
-          <line x1="0" y1="440" x2="1000" y2="440" stroke="#fefefe" strokeWidth="6" />
-          <line x1="450" y1="0" x2="450" y2="700" stroke="#fefefe" strokeWidth="6" />
-          <line x1="820" y1="0" x2="820" y2="700" stroke="#fefefe" strokeWidth="6" />
-          <line x1="150" y1="0" x2="150" y2="700" stroke="#fefefe" strokeWidth="6" />
+          <line x1="80" y1="180" x2="950" y2="180" stroke="#ffffff" strokeWidth="5" />
+          <line x1="50" y1="360" x2="950" y2="360" stroke="#ffffff" strokeWidth="5" />
+          <line x1="300" y1="40" x2="300" y2="680" stroke="#ffffff" strokeWidth="6" />
+          <line x1="440" y1="80" x2="440" y2="660" stroke="#ffffff" strokeWidth="5" />
+          <line x1="760" y1="60" x2="760" y2="680" stroke="#ffffff" strokeWidth="5" />
 
-          {/* District labels */}
-          <text x="180" y="80" fill="#8f8c85" fontSize="13" fontFamily="Inter" fontWeight="600" letterSpacing="2">
-            SECTOR 3 - NORTH HIGHWAY
+          {/* District Sector Labels */}
+          <text x="590" y="90" fill="#475569" fontSize="12" fontFamily="IBM Plex Sans" fontWeight="700" letterSpacing="1.5">
+            SECTOR 1: WALLED CITY (PINK CITY)
           </text>
-          <text x="490" y="240" fill="#8f8c85" fontSize="14" fontFamily="Inter" fontWeight="700" letterSpacing="3">
-            SECTOR 7 - DOWNTOWN CIVIC GRID
+          <text x="360" y="225" fill="#475569" fontSize="11" fontFamily="IBM Plex Sans" fontWeight="700" letterSpacing="1">
+            SECTOR 3: MI ROAD & PAANCH BATTI
           </text>
-          <text x="160" y="410" fill="#8f8c85" fontSize="13" fontFamily="Inter" fontWeight="600" letterSpacing="2">
-            SECTOR 4 - CENTRAL HEIGHTS
+          <text x="130" y="270" fill="#475569" fontSize="11" fontFamily="IBM Plex Sans" fontWeight="700" letterSpacing="1">
+            SECTOR 5: VAISHALI NAGAR
           </text>
-          <text x="680" y="580" fill="#8f8c85" fontSize="13" fontFamily="Inter" fontWeight="600" letterSpacing="2">
-            SECTOR 9 - INDUSTRIAL PORT
+          <text x="180" y="440" fill="#475569" fontSize="11" fontFamily="IBM Plex Sans" fontWeight="700" letterSpacing="1">
+            SECTOR 4: MANSAROVAR METRO GRID
+          </text>
+          <text x="630" y="370" fill="#475569" fontSize="11" fontFamily="IBM Plex Sans" fontWeight="700" letterSpacing="1">
+            SECTOR 7: JLN MARG / WTP
+          </text>
+          <text x="580" y="620" fill="#475569" fontSize="11" fontFamily="IBM Plex Sans" fontWeight="700" letterSpacing="1">
+            SECTOR 8: SITAPURA INDUSTRIAL AREA
           </text>
         </svg>
 
-        {/* Dynamic Evacuation / Hazard Radii */}
+        {/* Dynamic Evacuation & Safety Cordon Radii */}
         {showEvacuationZones &&
           incidents
             .filter((inc) => inc.status !== 'RESOLVED' && inc.evacuationRadiusMeters)
             .map((inc) => {
               const coords = toMapCoords(inc.location.latitude, inc.location.longitude);
               const isSelected = selectedIncident?.id === inc.id;
-              const radiusSize = inc.severity === 'CRITICAL' ? 'w-48 h-48' : 'w-32 h-32';
+              const isCritical = inc.severity === 'CRITICAL';
+              const radiusSize = isCritical ? 'w-44 h-44' : 'w-32 h-32';
 
               return (
                 <div
                   key={`radius-${inc.id}`}
-                  className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none transition-all duration-300 ${radiusSize} ${
-                    inc.severity === 'CRITICAL'
-                      ? 'bg-red-500/15 border-2 border-red-500/40'
-                      : 'bg-amber-500/15 border-2 border-amber-500/40'
-                  } ${isSelected ? 'ring-4 ring-blue-500/30' : ''}`}
+                  className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none transition-all duration-200 ${radiusSize} ${
+                    isCritical
+                      ? 'bg-red-500/15 border-2 border-[#D92D20]/50'
+                      : 'bg-amber-500/15 border-2 border-[#D97706]/50'
+                  } ${isSelected ? 'ring-4 ring-[#2563EB]/40' : ''}`}
                   style={{ top: coords.top, left: coords.left }}
                 >
                   <div
                     className={`absolute inset-0 rounded-full animate-ping opacity-25 ${
-                      inc.severity === 'CRITICAL' ? 'bg-red-400' : 'bg-amber-400'
+                      isCritical ? 'bg-red-500' : 'bg-amber-500'
                     }`}
                   />
                 </div>
               );
             })}
 
-        {/* Resource Markers */}
+        {/* Resource Markers (First Responders) */}
         {showUnits &&
           resources.map((res) => {
             const coords = toMapCoords(res.latitude, res.longitude);
             const isRescue = res.type === 'RESCUE_TEAM';
             const isAmbulance = res.type === 'AMBULANCE';
+            const isDrone = res.type === 'DRONE_RECON';
 
             return (
               <div
@@ -217,23 +250,27 @@ export const TacticalMap: React.FC<TacticalMapProps> = ({
                 className="absolute transform -translate-x-1/2 -translate-y-1/2 z-20 cursor-pointer group"
                 style={{ top: coords.top, left: coords.left }}
               >
-                {/* Unit shape */}
+                {/* Tactical unit badge */}
                 {isRescue ? (
-                  <div className="w-5 h-5 bg-[#0051d5] rotate-45 border-2 border-white shadow-md flex items-center justify-center transition-transform hover:scale-125">
+                  <div className="w-5 h-5 bg-[#2563EB] rotate-45 border-2 border-white shadow-md flex items-center justify-center transition-transform group-hover:scale-125">
                     <Shield className="w-2.5 h-2.5 text-white -rotate-45" />
                   </div>
                 ) : isAmbulance ? (
-                  <div className="w-5 h-5 rounded-xs bg-[#059669] border-2 border-white shadow-md flex items-center justify-center transition-transform hover:scale-125">
+                  <div className="w-5 h-5 rounded-xs bg-[#16803A] border-2 border-white shadow-md flex items-center justify-center transition-transform group-hover:scale-125">
                     <HeartPulse className="w-3 h-3 text-white" />
                   </div>
+                ) : isDrone ? (
+                  <div className="w-5 h-5 rounded-full bg-[#0B1F33] border-2 border-white shadow-md flex items-center justify-center transition-transform group-hover:scale-125">
+                    <Radio className="w-2.5 h-2.5 text-blue-400" />
+                  </div>
                 ) : (
-                  <div className="w-5 h-5 rounded bg-[#d97706] border-2 border-white shadow-md flex items-center justify-center transition-transform hover:scale-125">
-                    <span className="text-[8px] font-bold text-white font-mono-data">E</span>
+                  <div className="w-5 h-5 rounded bg-[#D97706] border-2 border-white shadow-md flex items-center justify-center transition-transform group-hover:scale-125">
+                    <Flame className="w-2.5 h-2.5 text-white" />
                   </div>
                 )}
 
-                {/* Hover Tooltip */}
-                <div className="absolute left-1/2 -translate-x-1/2 -top-7 opacity-0 group-hover:opacity-100 transition-opacity bg-[#0b1f33] text-white px-2 py-0.5 rounded text-[10px] font-mono-data whitespace-nowrap shadow-md pointer-events-none z-30">
+                {/* Tooltip on hover */}
+                <div className="absolute left-1/2 -translate-x-1/2 -top-7 opacity-0 group-hover:opacity-100 transition-opacity bg-[#0B1F33] text-white px-2 py-0.5 rounded text-[10px] font-mono-data whitespace-nowrap shadow-md pointer-events-none z-30">
                   {res.callsign} ({res.status.replace('_', ' ')})
                 </div>
               </div>
@@ -249,16 +286,16 @@ export const TacticalMap: React.FC<TacticalMapProps> = ({
             const isCritical = inc.severity === 'CRITICAL';
             const isHigh = inc.severity === 'HIGH';
 
-            let markerBg = 'bg-[#0051d5]';
-            if (isCritical) markerBg = 'bg-[#ba1a1a]';
-            else if (isHigh) markerBg = 'bg-[#d97706]';
+            let markerBg = 'bg-[#2563EB]';
+            if (isCritical) markerBg = 'bg-[#D92D20]';
+            else if (isHigh) markerBg = 'bg-[#D97706]';
 
             return (
               <div
                 key={`inc-${inc.id}`}
                 onClick={() => onSelectIncident(inc)}
                 className={`absolute transform -translate-x-1/2 -translate-y-1/2 z-30 flex flex-col items-center cursor-pointer transition-all ${
-                  isSelected ? 'scale-115 z-40' : 'hover:scale-110'
+                  isSelected ? 'scale-110 z-40' : 'hover:scale-105'
                 }`}
                 style={{ top: coords.top, left: coords.left }}
               >
@@ -266,27 +303,27 @@ export const TacticalMap: React.FC<TacticalMapProps> = ({
                 <div
                   className={`px-2 py-0.5 rounded shadow-sm border mb-1 flex items-center gap-1 font-mono-data text-[10px] font-bold transition-colors ${
                     isSelected
-                      ? 'bg-[#0b1f33] text-white border-[#0b1f33] ring-2 ring-blue-400'
-                      : 'bg-white text-[#1b1c1d] border-[#c4c6cd]'
+                      ? 'bg-[#0B1F33] text-white border-[#0B1F33] ring-2 ring-blue-400'
+                      : 'bg-white text-[#101828] border-[#D9E0E7]'
                   }`}
                 >
                   <span>{inc.code}</span>
                   {isSelected && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping"></span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#2563EB] animate-ping"></span>
                   )}
                 </div>
 
-                {/* Pin Circle */}
+                {/* Pin Circle with category icon */}
                 <div
-                  className={`w-7 h-7 rounded-full border-2 border-white ${markerBg} flex items-center justify-center relative shadow-lg`}
+                  className={`w-7 h-7 rounded-full border-2 border-white ${markerBg} flex items-center justify-center relative shadow-md`}
                 >
                   {getIncidentIcon(inc.category)}
 
-                  {/* Pulsing ring for critical/high */}
+                  {/* Pulsing beacon for critical/high */}
                   {(isCritical || isHigh) && (
                     <div
-                      className={`absolute -inset-1 rounded-full animate-ping opacity-60 ${
-                        isCritical ? 'bg-red-500' : 'bg-amber-500'
+                      className={`absolute -inset-1 rounded-full animate-ping opacity-50 ${
+                        isCritical ? 'bg-[#D92D20]' : 'bg-[#D97706]'
                       }`}
                     />
                   )}
@@ -297,75 +334,79 @@ export const TacticalMap: React.FC<TacticalMapProps> = ({
       </div>
 
       {/* Map Action Controls (Top Right) */}
-      <div className="absolute top-4 right-4 flex flex-col gap-2 z-40">
+      <div className="absolute top-3 right-3 flex flex-col gap-1.5 z-40">
         <button
           onClick={() => setZoomLevel((z) => Math.min(2, z + 0.25))}
           title="Zoom In"
-          className="w-8 h-8 bg-white rounded shadow-sm border border-[#c4c6cd] flex items-center justify-center text-[#44474c] hover:text-[#00050e] hover:bg-slate-50 transition-colors"
+          className="w-8 h-8 bg-white rounded shadow-xs border border-[#D9E0E7] flex items-center justify-center text-[#52606D] hover:text-[#101828] hover:bg-[#F7F8FA] transition-colors"
         >
           <Plus className="w-4 h-4" />
         </button>
         <button
           onClick={() => setZoomLevel((z) => Math.max(0.8, z - 0.25))}
           title="Zoom Out"
-          className="w-8 h-8 bg-white rounded shadow-sm border border-[#c4c6cd] flex items-center justify-center text-[#44474c] hover:text-[#00050e] hover:bg-slate-50 transition-colors"
+          className="w-8 h-8 bg-white rounded shadow-xs border border-[#D9E0E7] flex items-center justify-center text-[#52606D] hover:text-[#101828] hover:bg-[#F7F8FA] transition-colors"
         >
           <Minus className="w-4 h-4" />
         </button>
         <button
           onClick={() => setZoomLevel(1)}
-          title="Center Grid"
-          className="w-8 h-8 mt-1 bg-white rounded shadow-sm border border-[#c4c6cd] flex items-center justify-center text-[#44474c] hover:text-[#00050e] hover:bg-slate-50 transition-colors"
+          title="Reset Jaipur Grid View"
+          className="w-8 h-8 mt-1 bg-white rounded shadow-xs border border-[#D9E0E7] flex items-center justify-center text-[#52606D] hover:text-[#101828] hover:bg-[#F7F8FA] transition-colors"
         >
           <Navigation className="w-4 h-4" />
         </button>
       </div>
 
       {/* Map Layers Toggle (Top Left) */}
-      <div className="absolute top-4 left-4 z-40 flex items-center gap-2">
+      <div className="absolute top-3 left-3 z-40 flex flex-wrap items-center gap-1.5">
         <button
           onClick={() => setShowEvacuationZones((v) => !v)}
-          className={`px-2.5 py-1 rounded text-xs font-semibold border flex items-center gap-1.5 backdrop-blur-xs transition-colors shadow-2xs ${
+          className={`px-2.5 py-1 rounded text-xs font-semibold border flex items-center gap-1.5 transition-colors shadow-2xs ${
             showEvacuationZones
-              ? 'bg-white/95 text-[#00050e] border-[#c4c6cd]'
-              : 'bg-slate-200/80 text-slate-500 border-slate-300 line-through'
+              ? 'bg-white text-[#101828] border-[#D9E0E7]'
+              : 'bg-slate-200/90 text-slate-500 border-slate-300 line-through'
           }`}
         >
-          <Layers className="w-3.5 h-3.5 text-[#0051d5]" />
-          <span>Evacuation Perimeters</span>
+          <Layers className="w-3.5 h-3.5 text-[#2563EB]" />
+          <span className="hidden sm:inline">Safety Perimeters</span>
+          <span className="sm:hidden">Cordons</span>
         </button>
         <button
           onClick={() => setShowUnits((v) => !v)}
-          className={`px-2.5 py-1 rounded text-xs font-semibold border flex items-center gap-1.5 backdrop-blur-xs transition-colors shadow-2xs ${
+          className={`px-2.5 py-1 rounded text-xs font-semibold border flex items-center gap-1.5 transition-colors shadow-2xs ${
             showUnits
-              ? 'bg-white/95 text-[#00050e] border-[#c4c6cd]'
-              : 'bg-slate-200/80 text-slate-500 border-slate-300 line-through'
+              ? 'bg-white text-[#101828] border-[#D9E0E7]'
+              : 'bg-slate-200/90 text-slate-500 border-slate-300 line-through'
           }`}
         >
-          <Shield className="w-3.5 h-3.5 text-emerald-600" />
-          <span>Units & Fleet</span>
+          <Shield className="w-3.5 h-3.5 text-[#16803A]" />
+          <span className="hidden sm:inline">First Responders</span>
+          <span className="sm:hidden">Fleet</span>
         </button>
       </div>
 
-      {/* Map Legend (Bottom Left matching Image 1.png) */}
-      <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-xs p-3 rounded shadow-sm border border-[#c4c6cd] z-40">
-        <h5 className="text-[10px] font-bold text-[#74777d] uppercase tracking-wider mb-2">
-          Tactical Legend
+      {/* Map Tactical Legend (Bottom Left) */}
+      <div className="absolute bottom-3 left-3 bg-white p-2.5 rounded shadow-xs border border-[#D9E0E7] z-40">
+        <h5 className="text-[10px] font-bold text-[#52606D] uppercase tracking-wider mb-1.5">
+          Jaipur Tactical Grid
         </h5>
-        <div className="flex flex-col gap-2 font-mono-data text-[11px] text-[#1b1c1d]">
+        <div className="flex flex-col gap-1.5 font-mono-data text-[11px] text-[#101828]">
           <div className="flex items-center gap-2">
-            <div className="w-3.5 h-3.5 rounded-full border border-white bg-[#ba1a1a] flex items-center justify-center relative shadow-xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
-            </div>
-            <span>Critical Incident</span>
+            <div className="w-3 h-3 rounded-full bg-[#D92D20] border border-white"></div>
+            <span>Critical Emergency</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3.5 h-3.5 bg-[#0051d5] rotate-45 border border-white shadow-xs"></div>
-            <span>Rescue Unit</span>
+            <div className="w-3 h-3 rounded-full bg-[#D97706] border border-white"></div>
+            <span>High Severity</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3.5 h-3.5 rounded-xs bg-[#059669] border border-white shadow-xs flex items-center justify-center">
-              <HeartPulse className="w-2.5 h-2.5 text-white" />
+            <div className="w-3 h-3 bg-[#2563EB] rotate-45 border border-white"></div>
+            <span>SDRF / Rescue Team</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-xs bg-[#16803A] border border-white flex items-center justify-center">
+              <HeartPulse className="w-2 h-2 text-white" />
             </div>
             <span>Ambulance / EMS</span>
           </div>
