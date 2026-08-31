@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Circle, useMap, Polyline } from 'react-leaflet';
+import { MapContainer, Marker, Popup, Circle, useMap, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { renderToStaticMarkup } from 'react-dom/server';
@@ -12,12 +12,11 @@ import {
   Layers,
   HeartPulse,
   Radio,
-  Eye,
-  Navigation
 } from 'lucide-react';
 import { Incident } from '@/src/types/incident';
 import { ResourceUnit } from '@/src/types/resource';
 import { APP_CONFIG } from '@/src/config/constants';
+import { MapLibreBasemap } from './MapLibreBasemap';
 
 interface TacticalMapProps {
   incidents: Incident[];
@@ -104,7 +103,7 @@ export const TacticalMap: React.FC<TacticalMapProps> = ({
   // Default Center for Jaipur
   const mapCenter: [number, number] = [APP_CONFIG.DEFAULT_MAP_CENTER.lat, APP_CONFIG.DEFAULT_MAP_CENTER.lng];
   const defaultZoom = APP_CONFIG.DEFAULT_ZOOM;
-  const cartoApiKey = import.meta.env.VITE_CARTO_API_KEY;
+
 
   const getIncidentIconConfig = (category: string, severity: string, isSelected: boolean) => {
     let bgColor = 'bg-blue-600';
@@ -156,18 +155,6 @@ export const TacticalMap: React.FC<TacticalMapProps> = ({
         fullHeight ? 'h-full min-h-[440px]' : 'h-[360px]'
       } bg-slate-100 overflow-hidden select-none border border-slate-200`}
     >
-      {!cartoApiKey && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-slate-100/95 backdrop-blur-sm">
-          <div className="text-center p-6 bg-white rounded-xl shadow-md border border-amber-200 max-w-sm">
-            <AlertTriangle className="w-10 h-10 text-amber-500 mx-auto mb-3" />
-            <h3 className="text-sm font-bold text-slate-900 font-mono-data mb-2">Map Configuration Required</h3>
-            <p className="text-xs text-slate-500 font-sans leading-relaxed">
-              The CARTO basemap API key is missing. Please configure <code>VITE_CARTO_API_KEY</code> in your environment to enable tactical mapping.
-            </p>
-          </div>
-        </div>
-      )}
-
       <MapContainer 
         center={mapCenter} 
         zoom={defaultZoom} 
@@ -177,15 +164,8 @@ export const TacticalMap: React.FC<TacticalMapProps> = ({
       >
         <MapUpdater selectedIncident={selectedIncident} />
         
-        {/* Professional Light Tactical Basemap (Carto Voyager) */}
-        {cartoApiKey && (
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-            url={`https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=${cartoApiKey}`}
-            subdomains="abcd"
-            maxZoom={20}
-          />
-        )}
+        {/* OpenFreeMap Positron — quiet emergency-operations basemap (no API key required) */}
+        <MapLibreBasemap styleUrl="https://tiles.openfreemap.org/styles/positron" />
 
         {/* Evacuation Zones (Circles) */}
         {showEvacuationZones &&
