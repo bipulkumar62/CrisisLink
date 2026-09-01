@@ -56,8 +56,9 @@ def create_app() -> FastAPI:
     app.add_exception_handler(Exception, unhandled_exception_handler)
 
     # 3. Root & Health Check Endpoints
-    @app.get(
+    @app.api_route(
         "/",
+        methods=["GET", "HEAD"],
         tags=["System Health"],
         summary="Root API Info",
         description="Returns API status and documentation links.",
@@ -72,8 +73,9 @@ def create_app() -> FastAPI:
             "api_v1": settings.API_V1_STR,
         }
 
-    @app.get(
+    @app.api_route(
         "/health",
+        methods=["GET", "HEAD"],
         tags=["System Health"],
         summary="Service Health Check",
         description="Public health and subsystem diagnostic probe for load balancers and container orchestrators.",
