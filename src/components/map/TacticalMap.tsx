@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MapContainer, Marker, Popup, Circle, useMap, Polyline } from 'react-leaflet';
+import { MapContainer, Marker, Popup, Circle, useMap, Polyline, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { renderToStaticMarkup } from 'react-dom/server';
@@ -16,7 +16,7 @@ import {
 import { Incident } from '@/src/types/incident';
 import { ResourceUnit } from '@/src/types/resource';
 import { APP_CONFIG } from '@/src/config/constants';
-import { MapLibreBasemap } from './MapLibreBasemap';
+
 
 interface TacticalMapProps {
   incidents: Incident[];
@@ -172,8 +172,11 @@ export const TacticalMap: React.FC<TacticalMapProps> = ({
       >
         <MapUpdater selectedIncident={selectedIncident} incidents={incidents} />
         
-        {/* OpenFreeMap Positron — quiet emergency-operations basemap (no API key required) */}
-        <MapLibreBasemap styleUrl="https://tiles.openfreemap.org/styles/positron" />
+        {/* CARTO Basemap with API Key */}
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          url={`https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?api_key=${import.meta.env.VITE_CARTO_API_KEY || ''}`}
+        />
 
         {/* Evacuation Zones (Circles) */}
         {showEvacuationZones &&
