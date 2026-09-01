@@ -1,6 +1,6 @@
 from backend.app.db.base_repository import IUserRepository
 from backend.app.schemas.auth import LoginRequest, TokenResponse, UserProfile
-from backend.app.security.auth import create_access_token
+from backend.app.security.auth import create_access_token, verify_password
 from backend.app.utils.error_handlers import UnauthorizedException
 from backend.app.utils.logger import logger
 
@@ -11,7 +11,7 @@ class AuthService:
 
     async def authenticate_user(self, login_in: LoginRequest) -> TokenResponse:
         user_record = await self.user_repo.get_by_username(login_in.username)
-        if not user_record or user_record["password"] != login_in.password:
+        if not user_record or not verify_password(login_in.password, user_record["password"]):
             logger.warning(f"Failed login attempt for username '{login_in.username}'")
             raise UnauthorizedException("Invalid username or password credentials.")
 

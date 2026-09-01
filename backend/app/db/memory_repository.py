@@ -9,6 +9,7 @@ from backend.app.db.base_repository import (
     IResourceRepository,
     IUserRepository,
 )
+from backend.app.security.auth import hash_password
 from backend.app.schemas.report import (
     CitizenReportCreate,
     CitizenReportResponse,
@@ -589,7 +590,7 @@ class InMemoryUserRepository(IUserRepository):
             "dispatcher": {
                 "id": "usr-402",
                 "username": "dispatcher",
-                "password": "password123",  # Dev password for local testing
+                "password": hash_password("password123"),
                 "full_name": "Rajesh Sharma",
                 "badge_number": "RAJ-CAD-402",
                 "role": UserRole.DISPATCHER,
@@ -598,7 +599,7 @@ class InMemoryUserRepository(IUserRepository):
             "commander": {
                 "id": "usr-101",
                 "username": "commander",
-                "password": "password123",
+                "password": hash_password("password123"),
                 "full_name": "Col. Vikram Rathore",
                 "badge_number": "SDRF-CMD-01",
                 "role": UserRole.INCIDENT_COMMANDER,

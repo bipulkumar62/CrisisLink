@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { RoutePath } from '@/src/config/constants';
-import { AuthProvider } from '@/src/context/AuthContext';
+import { AuthProvider, useAuth } from '@/src/context/AuthContext';
 import { EmergencyDataProvider } from '@/src/context/EmergencyDataContext';
 import { TopNavBar } from '@/src/components/layout/TopNavBar';
 import { SideNavBar } from '@/src/components/layout/SideNavBar';
@@ -25,12 +25,20 @@ import { OperationalMapPage } from '@/src/pages/command/OperationalMapPage';
 import { SystemStatusPage } from '@/src/pages/command/SystemStatusPage';
 
 function AppContent() {
-  const [currentRoute, setCurrentRoute] = useState<RoutePath>('command-dashboard');
+  const { isAuthenticated, isLoading } = useAuth();
+  const [currentRoute, setCurrentRoute] = useState<RoutePath>('citizen-landing');
   const [selectedIncidentCode, setSelectedIncidentCode] = useState<string>('CL-102');
   const [activeTrackingToken, setActiveTrackingToken] = useState<string>('CR-89241');
 
   const isCommandRoute = currentRoute.startsWith('command-') && currentRoute !== 'command-login';
   const isDashboardOrMap = currentRoute === 'command-dashboard' || currentRoute === 'command-map';
+
+  // Route Guard Effect
+  React.useEffect(() => {
+    if (!isLoading && isCommandRoute && !isAuthenticated) {
+      setCurrentRoute('command-login');
+    }
+  }, [currentRoute, isAuthenticated, isLoading, isCommandRoute]);
 
   const handleNavigate = (route: RoutePath) => {
     setCurrentRoute(route);
@@ -53,7 +61,7 @@ function AppContent() {
       {/* Main Container Layout */}
       <div className={`flex-1 flex pt-[68px] ${isDashboardOrMap ? 'h-full' : ''}`}>
         {/* Command Center Operational Sidebar */}
-        {isCommandRoute && (
+        {isCommandRoute && isAuthenticated && (
           <SideNavBar currentRoute={currentRoute} onNavigate={handleNavigate} />
         )}
 

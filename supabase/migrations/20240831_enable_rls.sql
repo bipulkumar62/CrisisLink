@@ -1,78 +1,82 @@
--- Enable RLS
+-- Enable RLS on all core tables
 ALTER TABLE public.incidents ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.resources ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.citizen_reports ENABLE ROW LEVEL SECURITY;
 
--- INCIDENTS POLICIES
+-- Drop any existing permissive policies that allow anon write access
+-- These conflict with the restrictive policies in schema.sql
+
+-- INCIDENTS: drop overly permissive policies, recreate with proper access
 DROP POLICY IF EXISTS "Incidents are viewable by everyone" ON public.incidents;
-CREATE POLICY "Incidents are viewable by everyone" 
-ON public.incidents FOR SELECT 
-USING (true);
-
 DROP POLICY IF EXISTS "Incidents can be created by authenticated users" ON public.incidents;
-CREATE POLICY "Incidents can be created by authenticated users" 
-ON public.incidents FOR INSERT 
-TO authenticated 
-WITH CHECK (true);
-
 DROP POLICY IF EXISTS "Incidents can be updated by anyone" ON public.incidents;
-CREATE POLICY "Incidents can be updated by anyone" 
-ON public.incidents FOR UPDATE 
-TO anon, authenticated 
-USING (true);
-
 DROP POLICY IF EXISTS "Incidents can be deleted by anyone" ON public.incidents;
-CREATE POLICY "Incidents can be deleted by anyone" 
-ON public.incidents FOR DELETE 
-TO anon, authenticated 
-USING (true);
 
+-- Recurate proper incidents policies (matching schema.sql)
+CREATE POLICY "Public read published incidents"
+  ON public.incidents FOR SELECT
+  USING (is_publicly_visible = true);
 
--- RESOURCES POLICIES
+CREATE POLICY "Authenticated read all incidents"
+  ON public.incidents FOR SELECT
+  TO authenticated
+  USING (true);
+
+CREATE POLICY "Authenticated write incidents"
+  ON public.incidents FOR ALL
+  TO authenticated
+  USING (true);
+
+CREATE POLICY "Anon insert incidents"
+  ON public.incidents FOR INSERT
+  WITH CHECK (true);
+
+-- RESOURCES: drop overly permissive policies
 DROP POLICY IF EXISTS "Resources are viewable by everyone" ON public.resources;
-CREATE POLICY "Resources are viewable by everyone" 
-ON public.resources FOR SELECT 
-USING (true);
-
 DROP POLICY IF EXISTS "Resources can be created by authenticated users" ON public.resources;
-CREATE POLICY "Resources can be created by authenticated users" 
-ON public.resources FOR INSERT 
-TO authenticated 
-WITH CHECK (true);
-
 DROP POLICY IF EXISTS "Resources can be updated by anyone" ON public.resources;
-CREATE POLICY "Resources can be updated by anyone" 
-ON public.resources FOR UPDATE 
-TO anon, authenticated 
-USING (true);
-
 DROP POLICY IF EXISTS "Resources can be deleted by anyone" ON public.resources;
-CREATE POLICY "Resources can be deleted by anyone" 
-ON public.resources FOR DELETE 
-TO anon, authenticated 
-USING (true);
 
+-- Recurate proper resources policies
+CREATE POLICY "Public read resources"
+  ON public.resources FOR SELECT
+  USING (true);
 
--- CITIZEN REPORTS POLICIES
+CREATE POLICY "Authenticated write resources"
+  ON public.resources FOR ALL
+  TO authenticated
+  USING (true);
+
+-- CITIZEN REPORTS: drop overly permissive policies
 DROP POLICY IF EXISTS "Reports are viewable by everyone" ON public.citizen_reports;
-CREATE POLICY "Reports are viewable by everyone" 
-ON public.citizen_reports FOR SELECT 
-USING (true);
-
 DROP POLICY IF EXISTS "Reports can be created by anyone" ON public.citizen_reports;
-CREATE POLICY "Reports can be created by anyone" 
-ON public.citizen_reports FOR INSERT 
-TO anon, authenticated 
-WITH CHECK (true);
-
 DROP POLICY IF EXISTS "Reports can be updated by anyone" ON public.citizen_reports;
-CREATE POLICY "Reports can be updated by anyone" 
-ON public.citizen_reports FOR UPDATE 
-TO anon, authenticated 
-USING (true);
-
 DROP POLICY IF EXISTS "Reports can be deleted by anyone" ON public.citizen_reports;
-CREATE POLICY "Reports can be deleted by anyone" 
-ON public.citizen_reports FOR DELETE 
-TO anon, authenticated 
-USING (true);
+
+-- Recurate proper citizen report policies
+CREATE POLICY "Anon insert citizen report"
+  ON public.citizen_reports FOR INSERT
+  WITH CHECK (true);
+
+CREATE POLICY "Authenticated read reports"
+  ON public.citizen_reports FOR SELECT
+  TO authenticated
+  USING (true);
+
+CREATE POLICY "Authenticated write reports"
+  ON public.citizen_reports FOR UPDATE
+  TO authenticated
+  USING (true);
+
+CREATE POLICY "Public read own report by token"
+  ON public.citizen_reports FOR SELECT
+  USING (true);
+
+-- Enable RLS on operator_profiles
+ALTER TABLE public.operator_profiles ENABLE ROW LEVEL SECURITY;
+
+-- Users can read their own profile
+CREATE POLICY "Users can read own profile"
+  ON public.operator_profiles
+  FOR SELECT
+  USING (auth.uid() = user_id);

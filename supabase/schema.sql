@@ -285,3 +285,26 @@ VALUES
 ('res-d01', 'DRONE-01', 'Aerial Recon Drone Alpha', 'DRONE_RECON', 'AVAILABLE', 'Station 1 - HQ', 1, '{"Thermal Imaging","4K Camera","120min Flight","LIDAR"}', 100, 26.9124, 75.7873, '{"aerial_surveillance","thermal_imaging","search_rescue"}', now()),
 ('res-s01', 'SHELTER-01', 'Eastside Community Shelter', 'SHELTER', 'AVAILABLE', 'Eastside Community Center', 8, '{"Emergency Cots x200","Medical Aid Station","Water Purification","Generator"}', 100, 26.8640, 75.8200, '{"mass_evacuation","medical_aid","family_services"}', now())
 ON CONFLICT (id) DO NOTHING;
+
+-- ============================================================
+-- TABLE: operator_profiles (Role-Based Access Control)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.operator_profiles (
+  user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  role TEXT NOT NULL CHECK (role IN ('INCIDENT_COMMANDER', 'DISPATCHER', 'RESOURCE_COORDINATOR')),
+  badge_number TEXT UNIQUE NOT NULL,
+  agency TEXT NOT NULL DEFAULT 'Jaipur Command Center',
+  is_active BOOLEAN NOT NULL DEFAULT true,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- RLS Policies for operator_profiles
+ALTER TABLE public.operator_profiles ENABLE ROW LEVEL SECURITY;
+
+-- Users can read their own profile
+CREATE POLICY "Users can read own profile"
+  ON public.operator_profiles
+  FOR SELECT
+  USING (auth.uid() = user_id);
+
+-- System admins or service roles can manage profiles (bypasses RLS by default)
