@@ -150,12 +150,14 @@ export class SupabaseIncidentService implements IIncidentService {
   }
 
   async createIncident(payload: Partial<Incident>): Promise<Incident> {
+    const randomSalt = Math.random().toString(36).substring(2, 6).toUpperCase();
     const incidentCount = await supabase.from('incidents').select('id', { count: 'exact', head: true });
-    const nextNum = 120 + (incidentCount.count || 0) + 1;
-    const newCode = payload.code || `CL-JP-${nextNum}`;
+    const baseNum = 120 + (incidentCount.count || 0) + 1;
+    const newCode = payload.code || `CL-JP-${baseNum}-${randomSalt}`;
+    const incidentId = payload.id || `inc-${Date.now()}-${randomSalt.toLowerCase()}`;
 
     const row = {
-      id: `inc-${Date.now()}`,
+      id: incidentId,
       code: newCode,
       title: payload.title || 'Reported Emergency Incident',
       description: payload.description || '',

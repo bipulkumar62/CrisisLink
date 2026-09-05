@@ -106,7 +106,17 @@ export class SupabaseReportService implements IReportService {
       .select('*')
       .order('submitted_at', { ascending: false });
 
-    if (error) throw new Error(`[SupabaseReportService] getReports: ${error.message}`);
+    if (error) {
+      // If RLS prevents anonymous access, return empty list gracefully
+      if (
+        error.code === '42501' ||
+        error.message?.includes('permission denied') ||
+        error.message?.includes('row-level security')
+      ) {
+        return [];
+      }
+      throw new Error(`[SupabaseReportService] getReports: ${error.message}`);
+    }
     return (data || []).map(rowToReport);
   }
 

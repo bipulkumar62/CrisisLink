@@ -43,27 +43,39 @@ export const IncidentDetailPage: React.FC<IncidentDetailPageProps> = ({
 }) => {
   const { incidents, updateIncidentStatus, resources, isLoading } = useEmergencyData();
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [statusUpdating, setStatusUpdating] = useState(false);
+  const [statusError, setStatusError] = useState<string | null>(null);
 
   if (isLoading) {
     return <IncidentDetailSkeleton />;
   }
 
-  const incident =
-    incidents.find((i) => i.code.toLowerCase() === incidentCode.toLowerCase()) || incidents[0];
+  const incident = incidents.find(
+    (i) => i.code.toLowerCase() === incidentCode.toLowerCase() || i.id === incidentCode
+  );
 
   if (!incident) {
     return (
-      <div className="p-8 text-center bg-[#F7F8FA] min-h-full">
-        <p className="text-sm text-slate-500 font-mono-data">Incident record not found for code: {incidentCode}</p>
+      <div className="p-12 text-center bg-[#F7F8FA] min-h-[60vh] flex flex-col items-center justify-center space-y-4">
+        <div className="w-12 h-12 rounded-full bg-amber-100 border border-amber-200 flex items-center justify-center text-amber-700">
+          <AlertTriangle className="w-6 h-6" />
+        </div>
+        <div className="space-y-1">
+          <h2 className="text-lg font-bold text-slate-900 font-heading">Incident Record Not Found</h2>
+          <p className="text-xs text-slate-500 font-mono-data">
+            No active or archived CAD incident matches code: <span className="font-bold text-slate-800">{incidentCode}</span>
+          </p>
+        </div>
         <button
           onClick={() => onNavigate('command-incidents')}
-          className="mt-3 px-4 py-2 bg-[#0B1F33] text-white rounded text-xs font-bold font-mono-data"
+          className="mt-2 px-5 py-2.5 bg-[#0B1F33] hover:bg-[#153454] text-white rounded-lg text-xs font-bold font-mono-data cursor-pointer transition-colors shadow-xs"
         >
           Return to Incident Queue
         </button>
       </div>
     );
   }
+
 
   const assignedUnits = resources.filter((r) => incident.assignedResourceIds.includes(r.id));
 
@@ -151,8 +163,21 @@ export const IncidentDetailPage: React.FC<IncidentDetailPageProps> = ({
             <span className="text-xs text-slate-500 font-mono-data font-bold">Status Workflow:</span>
             <select
               value={incident.status}
-              onChange={(e) => updateIncidentStatus(incident.id, e.target.value as IncidentStatus)}
-              className="px-3 py-1.5 text-xs border border-slate-300 rounded font-mono-data font-bold bg-white text-slate-900 focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+              disabled={statusUpdating}
+              onChange={async (e) => {
+                const nextStatus = e.target.value as IncidentStatus;
+                setStatusUpdating(true);
+                setStatusError(null);
+                try {
+                  await updateIncidentStatus(incident.id, nextStatus);
+                } catch (err: unknown) {
+                  const msg = err instanceof Error ? err.message : 'Failed to update status';
+                  setStatusError(msg);
+                } finally {
+                  setStatusUpdating(false);
+                }
+              }}
+              className="px-3 py-1.5 text-xs border border-slate-300 rounded font-mono-data font-bold bg-white text-slate-900 focus:ring-2 focus:ring-blue-600 focus:outline-hidden disabled:opacity-50"
             >
               <option value="ACTIVE">ACTIVE</option>
               <option value="TRIAGED">TRIAGED</option>
@@ -163,6 +188,14 @@ export const IncidentDetailPage: React.FC<IncidentDetailPageProps> = ({
             </select>
           </div>
         </div>
+
+        {statusError && (
+          <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg font-mono-data flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 shrink-0" />
+            <span>Operational Error: {statusError}</span>
+          </div>
+        )}
+
 
         {/* Title, Geocoded Coordinates, & Dispatch CTA */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

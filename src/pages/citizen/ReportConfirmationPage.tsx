@@ -35,9 +35,10 @@ export const ReportConfirmationPage: React.FC<ReportConfirmationPageProps> = ({
   const [copied, setCopied] = useState(false);
   const [notifySms, setNotifySms] = useState(true);
 
-  const report =
-    reports.find((r) => r.trackingToken.toUpperCase() === trackingToken.toUpperCase()) ||
-    reports[0];
+  const report = reports.find(
+    (r) => r.trackingToken && r.trackingToken.toUpperCase() === trackingToken.toUpperCase()
+  );
+
 
   const handleCopy = () => {
     navigator.clipboard.writeText(trackingToken);
@@ -97,7 +98,7 @@ export const ReportConfirmationPage: React.FC<ReportConfirmationPageProps> = ({
         </div>
 
         {/* Submitted Report Summary Card */}
-        {report && (
+        {report ? (
           <div className="p-4 bg-[#F7F8FA] border border-[#D9E0E7] rounded-xl text-left space-y-3">
             <div className="flex items-center justify-between border-b border-[#D9E0E7] pb-2">
               <span className="text-xs font-bold text-[#101828] font-heading uppercase tracking-wider">
@@ -175,7 +176,18 @@ export const ReportConfirmationPage: React.FC<ReportConfirmationPageProps> = ({
               </div>
             )}
           </div>
+        ) : (
+          <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-left space-y-2">
+            <div className="flex items-center gap-2 text-slate-700 text-xs font-bold font-mono-data">
+              <Shield className="w-4 h-4 text-slate-500" />
+              <span>Report Intake Confirmation</span>
+            </div>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Your tracking token has been registered in the Jaipur municipal emergency queue. Ingestion and dispatch sync may take a few moments under heavy disaster traffic.
+            </p>
+          </div>
         )}
+
 
         {/* Live Response 4-Stage Pipeline Tracker */}
         <div className="pt-5 border-t border-[#D9E0E7] text-left space-y-4">

@@ -35,11 +35,12 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({
   onNavigate,
   onSelectIncidentDetail,
 }) => {
-  const { reports, incidents, isLoading } = useEmergencyData();
+  const { reports, incidents, isLoading, createIncident, clusterReportToIncident } = useEmergencyData();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<CitizenReportStatus | 'ALL'>('ALL');
   const [selectedReport, setSelectedReport] = useState<CitizenReport | null>(reports[0] || null);
   const [actionSuccessMessage, setActionSuccessMessage] = useState<string | null>(null);
+  const [isProcessingAction, setIsProcessingAction] = useState<boolean>(false);
 
   if (isLoading) {
     return <ReportsSkeleton />;
@@ -59,10 +60,66 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({
     return true;
   });
 
+  const handleCreateIncidentFromReport = async () => {
+    if (!selectedReport || isProcessingAction) return;
+    setIsProcessingAction(true);
+    try {
+      const newInc = await createIncident({
+        title: `${selectedReport.incidentCategory} - ${selectedReport.location.address.slice(0, 30)}`,
+        description: selectedReport.description,
+        category: selectedReport.incidentCategory,
+        severity: (selectedReport.severitySelfReported || 'HIGH') as any,
+        location: {
+          address: selectedReport.location.address,
+          sector: selectedReport.location.neighborhood || 'Jaipur Central',
+          latitude: selectedReport.location.latitude,
+          longitude: selectedReport.location.longitude,
+        },
+      });
+      await clusterReportToIncident(selectedReport.id, newInc.id);
+      setActionSuccessMessage(`CAD Incident ${newInc.code} established and clustered.`);
+      setTimeout(() => setActionSuccessMessage(null), 4000);
+      onSelectIncidentDetail(newInc.code);
+      onNavigate('command-incident-detail');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Incident creation failed';
+      setActionSuccessMessage(`Operational Error: ${msg}`);
+    } finally {
+      setIsProcessingAction(false);
+    }
+  };
+
+  const handleApproveAndCluster = async () => {
+    if (!selectedReport || isProcessingAction) return;
+    setIsProcessingAction(true);
+    try {
+      const targetInc =
+        incidents.find((i) => i.id === selectedReport.clusteredIncidentId) ||
+        incidents.find((i) => i.status !== 'RESOLVED') ||
+        incidents[0];
+
+      if (targetInc) {
+        await clusterReportToIncident(selectedReport.id, targetInc.id);
+        setActionSuccessMessage(`Report ${selectedReport.trackingToken} clustered to ${targetInc.code}.`);
+        setTimeout(() => setActionSuccessMessage(null), 4000);
+        onSelectIncidentDetail(targetInc.code);
+        onNavigate('command-incident-detail');
+      } else {
+        await handleCreateIncidentFromReport();
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Clustering failed';
+      setActionSuccessMessage(`Operational Error: ${msg}`);
+    } finally {
+      setIsProcessingAction(false);
+    }
+  };
+
   const handleAction = (actionName: string) => {
     setActionSuccessMessage(`Report ${selectedReport?.trackingToken}: ${actionName} applied successfully in CAD audit trail.`);
     setTimeout(() => setActionSuccessMessage(null), 4000);
   };
+
 
   return (
     <div className="space-y-6 pb-12 p-4 lg:p-6 bg-[#F7F8FA] min-h-full">
@@ -295,26 +352,25 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({
               {/* Action 1: Approve & Cluster */}
               <button
                 type="button"
-                onClick={() => {
-                  handleAction('Approve & Clustered');
-                  onSelectIncidentDetail(selectedReport.clusteredIncidentId || 'CL-JP-102');
-                  onNavigate('command-incident-detail');
-                }}
-                className="w-full py-2 bg-[#2563EB] hover:bg-blue-700 text-white rounded text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-xs cursor-pointer"
+                disabled={isProcessingAction}
+                onClick={handleApproveAndCluster}
+                className="w-full py-2 bg-[#2563EB] hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-xs cursor-pointer"
               >
                 <CheckCircle className="w-3.5 h-3.5" />
-                <span>Approve & Cluster to Incident</span>
+                <span>{isProcessingAction ? 'Processing Triage...' : 'Approve & Cluster to Incident'}</span>
               </button>
 
               {/* Action 2: Create New CAD Incident */}
               <button
                 type="button"
-                onClick={() => handleAction('Created New CAD Incident')}
-                className="w-full py-2 bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 rounded text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                disabled={isProcessingAction}
+                onClick={handleCreateIncidentFromReport}
+                className="w-full py-2 bg-white hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed text-slate-800 border border-slate-300 rounded text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
               >
                 <PlusCircle className="w-3.5 h-3.5 text-emerald-600" />
                 <span>Create New CAD Incident</span>
               </button>
+
 
               {/* Action 3: Flag as Inconclusive/Spam */}
               <div className="grid grid-cols-2 gap-2 pt-1">

@@ -30,6 +30,7 @@ import {
 import { RoutePath, APP_CONFIG } from '@/src/config/constants';
 import { useEmergencyData } from '@/src/context/EmergencyDataContext';
 import { IncidentCategory, IncidentSeverity } from '@/src/types/incident';
+import { ReportSubmissionPayload } from '@/src/types/report';
 import { useBrowserGeolocation } from '@/src/hooks/useBrowserGeolocation';
 import { useBrowserSpeech } from '@/src/hooks/useBrowserSpeech';
 import { LocationPickerModal } from '@/src/components/common/LocationPickerModal';
@@ -136,6 +137,7 @@ export const ReportEmergencyPage: React.FC<ReportEmergencyPageProps> = ({
   // Submission Pipeline Progress
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [submissionStep, setSubmissionStep] = useState<string>('');
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
 
   // Sync GPS Coordinates when acquired
   useEffect(() => {
@@ -358,55 +360,66 @@ export const ReportEmergencyPage: React.FC<ReportEmergencyPageProps> = ({
       return;
     }
 
+    if (isSubmitting) {
+      return;
+    }
+
     setIsSubmitting(true);
-    setSubmissionStep('Validating coordinates in Jaipur municipal grid...');
+    setSubmissionStep('Transmitting emergency report to CAD intake queue...');
 
-    // Progress step simulation for UX
-    setTimeout(() => {
-      setSubmissionStep('Extracting media metadata & verifying client payload...');
-    }, 300);
+    const evidencePayload = mediaList.map((m) => ({
+      name: m.name,
+      type: 'PHOTO' as const,
+      sizeBytes: m.sizeBytes,
+    }));
 
-    setTimeout(() => {
-      setSubmissionStep('Transmitting to CAD intake queue (Local Mock API)...');
-    }, 600);
+    const reportPayload: ReportSubmissionPayload = {
+      category,
+      severity,
+      description: description.trim(),
+      address: address.trim(),
+      latitude: currentLat,
+      longitude: currentLng,
+      isAnonymous,
+      reporterName: isAnonymous ? undefined : reporterName.trim() || undefined,
+      reporterPhone: isAnonymous ? undefined : reporterPhone.trim() || undefined,
+      peopleAtRiskCount: peopleCount === 'UNKNOWN' ? 0 : Number(peopleCount),
+      evidenceFiles: evidencePayload,
+    };
 
-    setTimeout(() => {
-      setSubmissionStep('Generating verifiable citizen tracking token...');
-    }, 900);
+    try {
+      const report = await submitCitizenReport(reportPayload);
+      setIsSubmitting(false);
+      setSubmissionError(null);
+      onReportSubmitted(report.trackingToken);
+      onNavigate('citizen-confirmation');
+    } catch (err: unknown) {
+      setIsSubmitting(false);
+      const errMsg = err instanceof Error ? err.message : 'Network communication to CAD intake failed';
+      console.error('[CrisisLink Ingestion Failure]:', errMsg);
 
-    setTimeout(async () => {
+      // Cache failed submission in offline emergency storage so data is not lost
       try {
-        const evidencePayload = mediaList.map((m) => ({
-          name: m.name,
-          type: 'PHOTO' as const,
-          sizeBytes: m.sizeBytes,
-        }));
-
-        const report = await submitCitizenReport({
-          category,
-          severity,
-          description: description.trim(),
-          address: address.trim(),
-          latitude: currentLat,
-          longitude: currentLng,
-          isAnonymous,
-          reporterName: isAnonymous ? undefined : reporterName.trim() || undefined,
-          reporterPhone: isAnonymous ? undefined : reporterPhone.trim() || undefined,
-          peopleAtRiskCount: peopleCount === 'UNKNOWN' ? 0 : Number(peopleCount),
-          evidenceFiles: evidencePayload,
+        const storedQueue = JSON.parse(localStorage.getItem('crisislink_offline_reports') || '[]');
+        storedQueue.push({
+          ...reportPayload,
+          failedAt: new Date().toISOString(),
+          errorReason: errMsg,
         });
-
-        setIsSubmitting(false);
-        onReportSubmitted(report.trackingToken);
-        onNavigate('citizen-confirmation');
-      } catch (err) {
-        setIsSubmitting(false);
-        const fallbackToken = `CR-JP-${Math.floor(10000 + Math.random() * 90000)}`;
-        onReportSubmitted(fallbackToken);
-        onNavigate('citizen-confirmation');
+        localStorage.setItem('crisislink_offline_reports', JSON.stringify(storedQueue));
+      } catch (storageErr) {
+        console.warn('Could not cache report to localStorage:', storageErr);
       }
-    }, 1200);
+
+      setSubmissionError(
+        'Emergency transmission failed due to network or server disruption. Your entered report has been saved locally. In a life-threatening situation, immediately dial emergency dispatch directly.'
+      );
+
+      // Scroll to top error banner
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
+
 
   return (
     <div className="max-w-3xl mx-auto space-y-6 pb-24 px-2 sm:px-0">
@@ -423,6 +436,44 @@ export const ReportEmergencyPage: React.FC<ReportEmergencyPageProps> = ({
           </p>
         </div>
       </div>
+
+      {/* Emergency Submission Failure Alert */}
+      {submissionError && (
+        <div
+          id="emergency-submission-error"
+          className="p-5 bg-amber-50 border-2 border-red-500 rounded-xl space-y-3 text-xs text-slate-900 shadow-md animate-in fade-in"
+        >
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-6 h-6 text-red-600 shrink-0 mt-0.5" />
+            <div className="space-y-1 flex-1">
+              <h3 className="font-bold text-sm text-red-900">Emergency Transmission Alert</h3>
+              <p className="text-xs text-slate-800 leading-relaxed font-sans">{submissionError}</p>
+            </div>
+          </div>
+
+          <div className="pt-2 border-t border-amber-200 flex flex-wrap gap-2">
+            <a
+              href="tel:112"
+              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg flex items-center gap-1.5 shadow-xs text-xs"
+            >
+              <span>Call 112 (National Emergency)</span>
+            </a>
+            <a
+              href="tel:100"
+              className="px-3 py-2 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-lg flex items-center gap-1.5 text-xs"
+            >
+              <span>Call 100 (Police)</span>
+            </a>
+            <a
+              href="tel:108"
+              className="px-3 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-lg flex items-center gap-1.5 text-xs"
+            >
+              <span>Call 108 (Ambulance)</span>
+            </a>
+          </div>
+        </div>
+      )}
+
 
       {/* Main Reporting Form Card */}
       <div className="bg-white border border-slate-200 rounded-xl p-5 sm:p-8 shadow-sm space-y-8">
@@ -1017,11 +1068,13 @@ export const ReportEmergencyPage: React.FC<ReportEmergencyPageProps> = ({
               <button
                 id="submit-emergency-report-btn"
                 type="submit"
-                className="flex-1 py-4 bg-[#2563EB] hover:bg-[#1d4ed8] text-white font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer min-h-[50px] touch-manipulation"
+                disabled={isSubmitting}
+                className="flex-1 py-4 bg-[#2563EB] hover:bg-[#1d4ed8] text-white font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer min-h-[50px] touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <AlertTriangle className="w-4 h-4" />
                 <span>Transmit Emergency Report to CAD</span>
               </button>
+
 
               <button
                 id="cancel-report-btn"

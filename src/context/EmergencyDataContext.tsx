@@ -5,6 +5,7 @@ import { ResourceUnit, UnitStatus } from '@/src/types/resource';
 import { SystemTelemetry } from '@/src/types/system';
 import { services } from '@/src/services';
 import { ENV } from '@/src/config/env';
+import { supabase } from '@/src/lib/supabaseClient';
 
 interface EmergencyDataContextType {
   incidents: Incident[];
@@ -22,6 +23,8 @@ interface EmergencyDataContextType {
   removeResourceFromIncident: (incidentId: string, resourceId: string) => Promise<void>;
   submitCitizenReport: (payload: ReportSubmissionPayload) => Promise<CitizenReport>;
   updateResourceStatus: (resourceId: string, status: UnitStatus) => Promise<void>;
+  createIncident: (payload: Partial<Incident>) => Promise<Incident>;
+  clusterReportToIncident: (reportId: string, incidentId: string) => Promise<CitizenReport>;
   refreshData: () => Promise<void>;
   stats: {
     criticalCount: number;
@@ -42,6 +45,7 @@ export const EmergencyDataProvider: React.FC<{ children: React.ReactNode }> = ({
   const [telemetry, setTelemetry] = useState<SystemTelemetry | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const refreshTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const refreshData = useCallback(async () => {
     try {
@@ -49,7 +53,10 @@ export const EmergencyDataProvider: React.FC<{ children: React.ReactNode }> = ({
       const [incList, resList, repList, tel] = await Promise.all([
         services.incidentService.getIncidents(),
         services.resourceService.getResources(),
-        services.reportService.getReports(),
+        services.reportService.getReports().catch((err) => {
+          console.warn('[EmergencyData] Citizen reports restricted or unavailable for current session:', err);
+          return [];
+        }),
         services.systemService.getSystemTelemetry(),
       ]);
 
@@ -58,75 +65,80 @@ export const EmergencyDataProvider: React.FC<{ children: React.ReactNode }> = ({
       setReports(repList);
       setTelemetry(tel);
 
-      // Default select CL-102 or first incident if none selected
-      setSelectedIncident((prev) => {
-        if (prev) {
-          const fresh = incList.find((i) => i.id === prev.id);
-          return fresh || incList[0] || null;
+      // Default select top critical incident if none selected
+      setSelectedIncident((curr) => {
+        if (curr) {
+          const fresh = incList.find((i) => i.id === curr.id);
+          return fresh || curr;
         }
-        return incList[0] || null;
+        return incList.find((i) => i.severity === 'CRITICAL') || incList[0] || null;
       });
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch emergency intelligence');
+      const msg = err instanceof Error ? err.message : 'Unknown network failure during CAD refresh';
+      console.error('[CrisisLink CAD Data Refresh Error]:', msg);
+      setError(msg);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
+  // Debounced refresh to eliminate thundering herd storms on concurrent realtime events
+  const debouncedRefreshData = useCallback(() => {
+    if (refreshTimerRef.current) {
+      clearTimeout(refreshTimerRef.current);
+    }
+    refreshTimerRef.current = setTimeout(() => {
+      refreshData().catch((err) => console.warn('[EmergencyData] Background refresh failed:', err));
+    }, 300);
+  }, [refreshData]);
+
+  // Initial load
   useEffect(() => {
     refreshData();
   }, [refreshData]);
 
-  // ─── Supabase Real-time Subscriptions ─────────────────────────────────────
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const realtimeChannel = useRef<any>(null);
-
+  // ─── Supabase Real-time Subscriptions (Leak-proof & Throttled) ───────────
   useEffect(() => {
-    if (!ENV.IS_SUPABASE_MODE) return; // Only subscribe when Supabase is active
+    if (!ENV.IS_SUPABASE_MODE) return;
 
-    // Lazy import to avoid loading supabase client in mock mode
-    import('@/src/lib/supabaseClient').then(({ supabase }) => {
-      const channel = supabase
-        .channel('crisislink-realtime')
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'incidents' },
-          () => { refreshData(); }
-        )
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'resources' },
-          () => { refreshData(); }
-        )
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'citizen_reports' },
-          () => { refreshData(); }
-        )
-        .subscribe((status) => {
-          if (status === 'SUBSCRIBED') {
-            console.info('[CrisisLink] 🔴 Real-time channel subscribed — live updates active');
-          }
-        });
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (realtimeChannel as any).current = channel;
-
-      return () => {
-        supabase.removeChannel(channel);
-      };
-    });
-
-    return () => {
-      import('@/src/lib/supabaseClient').then(({ supabase }) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        if ((realtimeChannel as any).current) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          supabase.removeChannel((realtimeChannel as any).current);
+    let isSubscribed = true;
+    const channel = supabase
+      .channel('crisislink-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'incidents' },
+        () => {
+          if (isSubscribed) debouncedRefreshData();
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'resources' },
+        () => {
+          if (isSubscribed) debouncedRefreshData();
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'citizen_reports' },
+        () => {
+          if (isSubscribed) debouncedRefreshData();
+        }
+      )
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.info('[CrisisLink] 🔴 Real-time channel subscribed — live updates active');
         }
       });
+
+    return () => {
+      isSubscribed = false;
+      if (refreshTimerRef.current) {
+        clearTimeout(refreshTimerRef.current);
+      }
+      supabase.removeChannel(channel);
     };
-  }, [refreshData]);
+  }, [debouncedRefreshData]);
 
   const selectIncidentById = useCallback(
     (id: string) => {
@@ -164,11 +176,14 @@ export const EmergencyDataProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const assignResourceToIncident = useCallback(
     async (incidentId: string, resourceId: string) => {
+      let incidentAssigned = false;
       try {
         const updatedIncident = await services.incidentService.assignResourceToIncident(
           incidentId,
           resourceId
         );
+        incidentAssigned = true;
+
         const updatedResource = await services.resourceService.updateResourceStatus(
           resourceId,
           'EN_ROUTE',
@@ -183,6 +198,14 @@ export const EmergencyDataProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       } catch (err) {
         console.error('Failed to assign resource:', err);
+        // Compensating rollback: if incident assignment succeeded but resource status failed
+        if (incidentAssigned) {
+          try {
+            await services.incidentService.removeResourceFromIncident(incidentId, resourceId);
+          } catch (rollbackErr) {
+            console.error('Compensating rollback failed for incident assignment:', rollbackErr);
+          }
+        }
         throw err;
       }
     },
@@ -191,11 +214,14 @@ export const EmergencyDataProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const removeResourceFromIncident = useCallback(
     async (incidentId: string, resourceId: string) => {
+      let incidentRemoved = false;
       try {
         const updatedIncident = await services.incidentService.removeResourceFromIncident(
           incidentId,
           resourceId
         );
+        incidentRemoved = true;
+
         const updatedResource = await services.resourceService.updateResourceStatus(
           resourceId,
           'AVAILABLE'
@@ -209,11 +235,41 @@ export const EmergencyDataProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       } catch (err) {
         console.error('Failed to release resource:', err);
+        // Compensating rollback: if incident was removed but resource status failed
+        if (incidentRemoved) {
+          try {
+            await services.incidentService.assignResourceToIncident(incidentId, resourceId);
+          } catch (rollbackErr) {
+            console.error('Compensating rollback failed for resource release:', rollbackErr);
+          }
+        }
         throw err;
       }
     },
     [selectedIncident]
   );
+
+  const createIncident = useCallback(async (payload: Partial<Incident>) => {
+    try {
+      const newIncident = await services.incidentService.createIncident(payload);
+      setIncidents((prev) => [newIncident, ...prev]);
+      return newIncident;
+    } catch (err) {
+      console.error('Failed to create incident:', err);
+      throw err;
+    }
+  }, []);
+
+  const clusterReportToIncident = useCallback(async (reportId: string, incidentId: string) => {
+    try {
+      const updatedReport = await services.reportService.clusterReportToIncident(reportId, incidentId);
+      setReports((prev) => prev.map((r) => (r.id === reportId ? updatedReport : r)));
+      return updatedReport;
+    } catch (err) {
+      console.error('Failed to cluster report:', err);
+      throw err;
+    }
+  }, []);
 
   const submitCitizenReport = useCallback(
     async (payload: ReportSubmissionPayload) => {
@@ -223,19 +279,31 @@ export const EmergencyDataProvider: React.FC<{ children: React.ReactNode }> = ({
 
         // If high/critical severity, automatically create or link incident for responsiveness
         if (payload.severity === 'CRITICAL' || payload.severity === 'HIGH') {
-          const newIncident = await services.incidentService.createIncident({
-            title: `${payload.category} Emergency - ${payload.address.slice(0, 24)}`,
-            description: payload.description,
-            category: payload.category,
-            severity: payload.severity as IncidentSeverity,
-            location: {
-              address: payload.address,
-              sector: 'Sector 1 - Central Hub',
-              latitude: payload.latitude || 26.9124,
-              longitude: payload.longitude || 75.7873,
-            },
-          });
-          setIncidents((prev) => [newIncident, ...prev]);
+          try {
+            const newIncident = await services.incidentService.createIncident({
+              title: `${payload.category} Emergency - ${payload.address.slice(0, 24)}`,
+              description: payload.description,
+              category: payload.category,
+              severity: payload.severity as IncidentSeverity,
+              location: {
+                address: payload.address,
+                sector: 'Sector 1 - Central Hub',
+                latitude: payload.latitude || 26.9124,
+                longitude: payload.longitude || 75.7873,
+              },
+            });
+            setIncidents((prev) => [newIncident, ...prev]);
+
+            // Attempt to cluster report to newly created incident
+            try {
+              const clustered = await services.reportService.clusterReportToIncident(newReport.id, newIncident.id);
+              setReports((prev) => prev.map((r) => (r.id === newReport.id ? clustered : r)));
+            } catch (linkErr) {
+              console.warn('Auto-cluster link failed:', linkErr);
+            }
+          } catch (autoIncErr) {
+            console.warn('Auto-incident creation failed, report remains in triage queue:', autoIncErr);
+          }
         }
 
         return newReport;
@@ -266,7 +334,7 @@ export const EmergencyDataProvider: React.FC<{ children: React.ReactNode }> = ({
     highCount: incidents.filter((i) => i.severity === 'HIGH' && i.status !== 'RESOLVED').length,
     activeCount: incidents.filter((i) => i.status === 'ACTIVE' || i.status === 'TRIAGED' || i.status === 'DISPATCHED' || i.status === 'ON_SCENE').length,
     availableCount: resources.filter((r) => r.status === 'AVAILABLE').length,
-    resolvedCount: incidents.filter((i) => i.status === 'RESOLVED').length + 31,
+    resolvedCount: incidents.filter((i) => i.status === 'RESOLVED').length,
   };
 
   return (
@@ -287,6 +355,8 @@ export const EmergencyDataProvider: React.FC<{ children: React.ReactNode }> = ({
         removeResourceFromIncident,
         submitCitizenReport,
         updateResourceStatus,
+        createIncident,
+        clusterReportToIncident,
         refreshData,
         stats,
       }}
